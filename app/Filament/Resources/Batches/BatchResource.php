@@ -17,8 +17,16 @@ use Filament\Tables\Table;
 class BatchResource extends Resource
 {
     protected static ?string $model = Batch::class;
+    
+    protected static ?string $modelLabel = 'Parti';
+    protected static ?string $pluralModelLabel = 'Partiler';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Ürün Yönetimi';
+    }
 
     public static function form(Schema $schema): Schema
     {

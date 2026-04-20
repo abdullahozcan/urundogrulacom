@@ -29,7 +29,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->tenant(\App\Models\Company::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

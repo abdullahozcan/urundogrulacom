@@ -17,8 +17,16 @@ use Filament\Tables\Table;
 class ItemResource extends Resource
 {
     protected static ?string $model = Item::class;
+    
+    protected static ?string $modelLabel = 'Öğe (Item)';
+    protected static ?string $pluralModelLabel = 'Öğeler';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Ürün Yönetimi';
+    }
 
     public static function form(Schema $schema): Schema
     {

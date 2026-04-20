@@ -18,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'company_id'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements HasTenants
+class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -39,15 +39,5 @@ class User extends Authenticatable implements HasTenants
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function getTenants(Panel $panel): array|Collection
-    {
-        return $this->company ? collect([$this->company]) : collect([]);
-    }
-
-    public function canAccessTenant(Model $tenant): bool
-    {
-        return $this->company_id === $tenant->id;
     }
 }

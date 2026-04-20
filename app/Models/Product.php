@@ -16,6 +16,9 @@ class Product extends Model
         'name',
         'description',
         'image',
+        'type',
+        'digital_content_type',
+        'digital_file_path',
     ];
 
     public function company(): BelongsTo

@@ -17,8 +17,16 @@ use Filament\Tables\Table;
 class CompanyResource extends Resource
 {
     protected static ?string $model = Company::class;
+    
+    protected static ?string $modelLabel = 'Firma';
+    protected static ?string $pluralModelLabel = 'Firmalar';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Sistem';
+    }
 
     public static function form(Schema $schema): Schema
     {

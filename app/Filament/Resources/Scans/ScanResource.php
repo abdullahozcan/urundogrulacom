@@ -17,8 +17,16 @@ use Filament\Tables\Table;
 class ScanResource extends Resource
 {
     protected static ?string $model = Scan::class;
+    
+    protected static ?string $modelLabel = 'Okuma (Scan)';
+    protected static ?string $pluralModelLabel = 'Okumalar';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Raporlar';
+    }
 
     public static function form(Schema $schema): Schema
     {

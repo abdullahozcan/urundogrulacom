@@ -1,5 +1,18 @@
-<div class="w-full max-w-md mx-auto animate-fade-in" x-data="productCheck()">
+<div class="w-full {{ $item->batch->product->type === 'digital' ? 'max-w-3xl' : 'max-w-md' }} mx-auto animate-fade-in" x-data="productCheck()">
     
+    @if($item->batch->product->type === 'digital' && $item->batch->product->digital_file_path)
+    <div class="mb-6 rounded-2xl shadow-xl overflow-hidden bg-black flex justify-center">
+        @if($item->batch->product->digital_content_type === 'video')
+            <video controls class="w-full max-h-[60vh] object-contain">
+                <source src="{{ Storage::url($item->batch->product->digital_file_path) }}" type="video/mp4">
+                Tarayıcınız video etiketini desteklemiyor.
+            </video>
+        @elseif($item->batch->product->digital_content_type === 'pdf')
+            <iframe src="{{ Storage::url($item->batch->product->digital_file_path) }}" class="w-full h-[70vh] border-0"></iframe>
+        @endif
+    </div>
+    @endif
+
     <div class="glass rounded-2xl shadow-xl overflow-hidden">
         <!-- Header / Status -->
         <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-center text-white">
