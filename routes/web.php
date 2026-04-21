@@ -16,3 +16,17 @@ Route::get('/', function () {
 });
 
 Route::get('/check/{uuid}', CheckProduct::class)->name('product.check');
+
+Route::get('/blog/{slug}', function ($slug) {
+    $locale = app()->getLocale();
+    $defaultLocale = config('languages.default', 'tr');
+    
+    $post = \App\Models\Post::where('is_published', true)
+        ->where(function($query) use ($slug, $locale, $defaultLocale) {
+            $query->where("slug->{$locale}", $slug)
+                  ->orWhere("slug->{$defaultLocale}", $slug);
+        })
+        ->firstOrFail();
+
+    return view('blog.show', compact('post'));
+})->name('blog.show');

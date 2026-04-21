@@ -3,8 +3,26 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>{{ $title ?? 'urundogrula.com | Dijital Ürün Doğrulama' }}</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <title>{{ $title ?? \App\Helpers\SettingHelper::get('site_title', 'urundogrula.com | Dijital Ürün Doğrulama') }}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ $description ?? \App\Helpers\SettingHelper::get('site_description', 'Ürün orijinalliği doğrulama ve dijital marka koruma platformu.') }}" />
+    <meta name="keywords" content="{{ $keywords ?? \App\Helpers\SettingHelper::get('site_keywords', 'ürün doğrulama, qr kod, orijinal ürün, dijital noter') }}" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="{{ $ogTitle ?? $title ?? \App\Helpers\SettingHelper::get('site_title', 'urundogrula.com | Dijital Ürün Doğrulama') }}" />
+    <meta property="og:description" content="{{ $ogDescription ?? $description ?? \App\Helpers\SettingHelper::get('site_description', 'Ürün orijinalliği doğrulama platformu.') }}" />
+    <meta property="og:image" content="{{ $ogImage ?? \App\Helpers\SettingHelper::get('site_og_image', asset('img/default-og.jpg')) }}" />
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? \App\Helpers\SettingHelper::get('site_title', 'urundogrula.com') }}" />
+    <meta name="twitter:description" content="{{ $ogDescription ?? $description ?? \App\Helpers\SettingHelper::get('site_description', 'Ürün orijinalliği doğrulama platformu.') }}" />
+    <meta name="twitter:image" content="{{ $ogImage ?? \App\Helpers\SettingHelper::get('site_og_image', asset('img/default-og.jpg')) }}" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries,typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
     <script id="tailwind-config">

@@ -145,7 +145,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                 @foreach($posts as $post)
-                <a href="#" class="group block bg-surface-container-lowest rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_rgba(11,28,48,0.06)] transition-all duration-300">
+                <a href="{{ route('blog.show', $post->slug) }}" class="group block bg-surface-container-lowest rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_rgba(11,28,48,0.06)] transition-all duration-300">
                     <div class="aspect-[4/3] w-full overflow-hidden bg-surface-container-high relative">
                         @if($post->image)
                             <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
