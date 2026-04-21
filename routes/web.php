@@ -12,7 +12,8 @@ Route::get('/locale/{lang}', function ($lang) {
 
 Route::get('/', function () {
     $posts = \App\Models\Post::where('is_published', true)->where('show_on_homepage', true)->latest()->take(3)->get();
-    return view('welcome', compact('posts'));
+    $partners = \App\Models\Partner::where('is_active', true)->orderBy('sort_order', 'asc')->get();
+    return view('welcome', compact('posts', 'partners'));
 });
 
 Route::get('/check/{uuid}', CheckProduct::class)->name('product.check');
