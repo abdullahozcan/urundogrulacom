@@ -52,7 +52,7 @@ class ItemsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    \Filament\Tables\Actions\BulkAction::make('export_csv')
+                    \Filament\Actions\BulkAction::make('export_csv')
                         ->label('CSV Olarak İndir (Excel)')
                         ->icon('heroicon-o-document-text')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
@@ -84,7 +84,7 @@ class ItemsTable
                             return response()->stream($callback, 200, $headers);
                         }),
                         
-                    \Filament\Tables\Actions\BulkAction::make('export_txt')
+                    \Filament\Actions\BulkAction::make('export_txt')
                         ->label('TXT Olarak İndir')
                         ->icon('heroicon-o-document')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
@@ -105,7 +105,7 @@ class ItemsTable
                             return response()->stream($callback, 200, $headers);
                         }),
                         
-                    \Filament\Tables\Actions\BulkAction::make('export_json')
+                    \Filament\Actions\BulkAction::make('export_json')
                         ->label('JSON Olarak İndir')
                         ->icon('heroicon-o-code-bracket')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
