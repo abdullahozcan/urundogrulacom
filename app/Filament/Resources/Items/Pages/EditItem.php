@@ -16,4 +16,11 @@ class EditItem extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\ItemScansChart::class,
+        ];
+    }
 }

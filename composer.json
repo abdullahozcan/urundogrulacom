@@ -12,6 +12,7 @@
         "hisorange/browser-detect": "*",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
+        "simplesoftwareio/simple-qrcode": "*",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {

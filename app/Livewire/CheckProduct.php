@@ -47,7 +47,7 @@ class CheckProduct extends Component
         $this->scanSaved = true;
     }
 
-    #[Layout('components.layouts.app')]
+    #[Layout('components.layouts.public')]
     public function render()
     {
         return view('livewire.check-product');

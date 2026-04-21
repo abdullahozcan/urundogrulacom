@@ -15,12 +15,18 @@ class ItemForm
             ->components([
                 Select::make('batch_id')
                     ->relationship('batch', 'id')
-                    ->required(),
+                    ->required()
+                    ->disabled(),
                 TextInput::make('uuid')
                     ->label('UUID')
-                    ->required(),
+                    ->required()
+                    ->disabled(),
                 Toggle::make('is_scanned')
-                    ->required(),
+                    ->label('Okutuldu mu?')
+                    ->disabled(),
+                \Filament\Forms\Components\Placeholder::make('scan_count')
+                    ->label('Toplam Okutulma Sayısı')
+                    ->content(fn ($record) => $record ? $record->scans()->count() . ' kez' : '-'),
             ]);
     }
 }

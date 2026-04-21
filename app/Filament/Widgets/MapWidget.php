@@ -21,7 +21,7 @@ class MapWidget extends Widget
             ->whereNotNull('lat')
             ->whereNotNull('lng')
             ->latest('scanned_at')
-            ->take(50);
+            ->take(10);
             
         // If user is not superadmin and is attached to a company, filter by company
         $user = auth()->user();

@@ -20,6 +20,9 @@ class ItemsTable
                 TextColumn::make('uuid')
                     ->label('UUID')
                     ->searchable(),
+                \Filament\Tables\Columns\ViewColumn::make('qr')
+                    ->label('QR Kod')
+                    ->view('filament.tables.columns.qr-code'),
                 IconColumn::make('is_scanned')
                     ->boolean(),
                 TextColumn::make('created_at')
