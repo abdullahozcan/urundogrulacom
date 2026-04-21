@@ -36,10 +36,14 @@ class PostForm
                     ->columnSpanFull(),
                 FileUpload::make('image')
                     ->image()
+                    ->disk('public')
                     ->directory('blog')
                     ->columnSpanFull(),
                 Toggle::make('is_published')
                     ->label('Yayınlandı mı?')
+                    ->default(false),
+                Toggle::make('show_on_homepage')
+                    ->label('Anasayfada Göster')
                     ->default(false),
             ]);
     }

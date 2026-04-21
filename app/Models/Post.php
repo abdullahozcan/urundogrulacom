@@ -14,6 +14,7 @@ class Post extends Model
         'content',
         'image',
         'is_published',
+        'show_on_homepage',
     ];
 
     public array $translatable = ['title', 'slug', 'content'];
@@ -23,5 +24,6 @@ class Post extends Model
         'slug' => 'array',
         'content' => 'array',
         'is_published' => 'boolean',
+        'show_on_homepage' => 'boolean',
     ];
 }

@@ -91,6 +91,7 @@
         }
     </style>
     @livewireStyles
+    {!! \App\Helpers\SettingHelper::get('custom_head_scripts') !!}
 </head>
 
 <body class="bg-background text-on-background selection:bg-secondary-fixed-dim flex flex-col min-h-screen">

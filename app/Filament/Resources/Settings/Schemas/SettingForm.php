@@ -15,8 +15,9 @@ class SettingForm
         foreach ($locales as $code => $label) {
             $tabs[] = \Filament\Schemas\Components\Tabs\Tab::make($label)
                 ->schema([
-                    TextInput::make("value.{$code}")
+                    \Filament\Forms\Components\Textarea::make("value.{$code}")
                         ->label("Değer ({$code})")
+                        ->rows(4)
                         ->required(fn () => $code === config('languages.default', 'tr')),
                 ]);
         }

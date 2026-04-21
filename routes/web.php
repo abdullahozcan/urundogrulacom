@@ -11,7 +11,7 @@ Route::get('/locale/{lang}', function ($lang) {
 })->name('locale.switch');
 
 Route::get('/', function () {
-    $posts = \App\Models\Post::where('is_published', true)->latest()->take(3)->get();
+    $posts = \App\Models\Post::where('is_published', true)->where('show_on_homepage', true)->latest()->take(3)->get();
     return view('welcome', compact('posts'));
 });
 
