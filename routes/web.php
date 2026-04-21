@@ -48,3 +48,12 @@ Route::get('/p/{slug}', function ($slug) {
 
     return view('pages.show', compact('page'));
 })->name('page.show');
+
+Route::get('/sitemap.xml', function () {
+    $posts = \App\Models\Post::where('is_published', true)->latest()->get();
+    $pages = \App\Models\Page::where('is_published', true)->latest()->get();
+    $defaultLocale = config('languages.default', 'tr');
+
+    return response()->view('sitemap', compact('posts', 'pages', 'defaultLocale'))
+                     ->header('Content-Type', 'text/xml');
+});
