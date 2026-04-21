@@ -165,11 +165,11 @@
                 <p class="text-slate-400 text-[10px] uppercase tracking-widest">Dijital Güven Platformu</p>
             </div>
             <nav class="flex flex-wrap justify-center gap-8 text-xs uppercase tracking-widest font-semibold">
-                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('blog.show', 'hakkimizda') }}">Hakkımızda</a>
-                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('blog.show', 'kullanim-kosullari') }}">Kullanım Koşulları</a>
-                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200 text-white font-bold" href="{{ route('blog.show', 'gizlilik-politikasi') }}">Gizlilik Politikası</a>
-                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('blog.show', 'kvkk') }}">KVKK</a>
-                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('blog.show', 'iletisim') }}">İletişim</a>
+                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('page.show', 'hakkimizda') }}">Hakkımızda</a>
+                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('page.show', 'kullanim-kosullari') }}">Kullanım Koşulları</a>
+                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200 text-white font-bold" href="{{ route('page.show', 'gizlilik-politikasi') }}">Gizlilik Politikası</a>
+                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('page.show', 'kvkk') }}">KVKK</a>
+                <a class="text-slate-400 hover:text-emerald-400 underline underline-offset-4 transition-colors duration-200" href="{{ route('contact') }}">İletişim</a>
             </nav>
             <div class="text-slate-400 text-xs font-medium opacity-80">
                 © {{ date('Y') }} urundogrula.com. Tüm Hakları Saklıdır.

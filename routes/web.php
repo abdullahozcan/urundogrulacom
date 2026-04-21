@@ -30,3 +30,21 @@ Route::get('/blog/{slug}', function ($slug) {
 
     return view('blog.show', compact('post'));
 })->name('blog.show');
+
+Route::get('/iletisim', function () {
+    return view('contact');
+})->name('contact');
+
+Route::get('/p/{slug}', function ($slug) {
+    $locale = app()->getLocale();
+    $defaultLocale = config('languages.default', 'tr');
+    
+    $page = \App\Models\Page::where('is_published', true)
+        ->where(function($query) use ($slug, $locale, $defaultLocale) {
+            $query->where("slug->{$locale}", $slug)
+                  ->orWhere("slug->{$defaultLocale}", $slug);
+        })
+        ->firstOrFail();
+
+    return view('pages.show', compact('page'));
+})->name('page.show');
