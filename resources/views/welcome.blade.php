@@ -191,4 +191,33 @@
             </div>
         </div>
     </section>
+
+    <!-- Partner Logos Slider -->
+    @if($partners->count() > 0)
+    <section class="w-full bg-white py-12 md:py-16 border-t border-slate-100 overflow-hidden relative">
+        <div class="max-w-screen-2xl mx-auto px-6 mb-8 text-center">
+            <p class="text-sm font-bold text-slate-400 tracking-widest uppercase">BİZİMLE ÇALIŞAN GÜÇLÜ MARKALAR</p>
+        </div>
+        
+        <!-- Mask for smooth fade at edges -->
+        <div class="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+        <div class="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+
+        <div class="flex overflow-hidden group">
+            <div class="flex space-x-12 md:space-x-24 animate-infinite-scroll group-hover:[animation-play-state:paused] items-center">
+                <!-- Double the logos to ensure seamless looping -->
+                @foreach($partners as $partner)
+                    <div class="flex-shrink-0 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->name }}" class="h-10 md:h-16 w-auto object-contain max-w-[150px] md:max-w-[200px]">
+                    </div>
+                @endforeach
+                @foreach($partners as $partner)
+                    <div class="flex-shrink-0 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->name }}" class="h-10 md:h-16 w-auto object-contain max-w-[150px] md:max-w-[200px]">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 </x-layouts.public>
