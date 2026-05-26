@@ -6,6 +6,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Schema;
 
 class ProductForm
@@ -15,7 +16,18 @@ class ProductForm
         return $schema
             ->components([
                 Select::make('company_id')
-                    ->relationship('company', 'name')
+                    ->relationship('company', 'name', modifyQueryUsing: function (Builder $query) {
+                        $user = auth()->user();
+
+                        if (!$user || $user->isSuperAdmin()) {
+                            return;
+                        }
+
+                        $query->whereKey($user->company_id);
+                    })
+                    ->default(fn () => auth()->user()?->company_id)
+                    ->visible(fn () => auth()->user()?->isSuperAdmin())
+                    ->dehydrated()
                     ->required(),
                 TextInput::make('name')
                     ->required(),

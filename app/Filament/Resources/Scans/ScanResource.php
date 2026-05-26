@@ -9,6 +9,7 @@ use App\Filament\Resources\Scans\Schemas\ScanForm;
 use App\Filament\Resources\Scans\Tables\ScansTable;
 use App\Models\Scan;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -36,6 +37,20 @@ class ScanResource extends Resource
     public static function table(Table $table): Table
     {
         return ScansTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (!$user || $user->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->whereHas('item.batch.product', function (Builder $q) use ($user) {
+            $q->where('company_id', $user->company_id);
+        });
     }
 
     public static function getRelations(): array

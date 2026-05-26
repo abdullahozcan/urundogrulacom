@@ -14,14 +14,19 @@ class TopScannedItemsWidget extends TableWidget
 
     public function table(Table $table): Table
     {
+        $user = auth()->user();
+        $query = \App\Models\Item::query()
+            ->with('batch.product')
+            ->withCount('scans');
+
+        if ($user && !$user->isSuperAdmin()) {
+            $query->whereHas('batch.product', function (Builder $q) use ($user) {
+                $q->where('company_id', $user->company_id);
+            });
+        }
+
         return $table
-            ->query(
-                \App\Models\Item::query()
-                    ->with('batch.product')
-                    ->withCount('scans')
-                    ->orderByDesc('scans_count')
-                    ->limit(10)
-            )
+            ->query($query->orderByDesc('scans_count')->limit(10))
             ->heading('En Çok Okutulan 10 Öğe')
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('uuid')

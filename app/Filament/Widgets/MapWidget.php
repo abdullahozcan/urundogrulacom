@@ -23,9 +23,9 @@ class MapWidget extends Widget
             ->latest('scanned_at')
             ->take(10);
             
-        // If user is not superadmin and is attached to a company, filter by company
+        // Only company-scoped users are restricted to their own company data
         $user = auth()->user();
-        if ($user && $user->company_id) {
+        if ($user && !$user->isSuperAdmin() && $user->company_id) {
             $query->whereHas('item.batch.product', function ($q) use ($user) {
                 $q->where('company_id', $user->company_id);
             });

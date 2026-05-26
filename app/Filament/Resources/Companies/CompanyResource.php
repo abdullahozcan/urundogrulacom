@@ -28,6 +28,16 @@ class CompanyResource extends Resource
         return 'Sistem';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->isSuperAdmin();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && auth()->user()->isSuperAdmin();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CompanyForm::configure($schema);

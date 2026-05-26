@@ -9,6 +9,7 @@ use App\Filament\Resources\Batches\Schemas\BatchForm;
 use App\Filament\Resources\Batches\Tables\BatchesTable;
 use App\Models\Batch;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -36,6 +37,20 @@ class BatchResource extends Resource
     public static function table(Table $table): Table
     {
         return BatchesTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (!$user || $user->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->whereHas('product', function (Builder $q) use ($user) {
+            $q->where('company_id', $user->company_id);
+        });
     }
 
     public static function getRelations(): array

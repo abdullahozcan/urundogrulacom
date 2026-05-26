@@ -23,7 +23,16 @@ class ItemScansChart extends ChartWidget
             if ($this->record) {
                 $count = $this->record->scans()->whereDate('created_at', $date)->count();
             } else {
-                $count = \App\Models\Scan::whereDate('created_at', $date)->count();
+                $query = \App\Models\Scan::query()->whereDate('created_at', $date);
+                $user = auth()->user();
+
+                if ($user && !$user->isSuperAdmin()) {
+                    $query->whereHas('item.batch.product', function ($q) use ($user) {
+                        $q->where('company_id', $user->company_id);
+                    });
+                }
+
+                $count = $query->count();
             }
             $data[] = $count;
         }

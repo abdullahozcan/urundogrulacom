@@ -37,7 +37,16 @@ class ItemsTable
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('product_id')
                     ->label('Ürün')
-                    ->options(\App\Models\Product::pluck('name', 'id'))
+                    ->options(function () {
+                        $user = auth()->user();
+                        $query = \App\Models\Product::query();
+
+                        if ($user && !$user->isSuperAdmin()) {
+                            $query->where('company_id', $user->company_id);
+                        }
+
+                        return $query->pluck('name', 'id');
+                    })
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             $query->whereHas('batch', function (\Illuminate\Database\Eloquent\Builder $query) use ($data) {
