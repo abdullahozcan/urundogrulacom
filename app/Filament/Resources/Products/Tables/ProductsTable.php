@@ -17,8 +17,19 @@ class ProductsTable
             ->columns([
                 TextColumn::make('company.name')
                     ->searchable(),
+                TextColumn::make('category.name')
+                    ->label('Kategori')
+                    ->placeholder('-')
+                    ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('qr_mode')
+                    ->label('QR Modu')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => $state === 'general' ? 'Genel' : 'Tekil'),
+                TextColumn::make('general_qr_code')
+                    ->label('Genel QR')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('image'),
                 TextColumn::make('created_at')
                     ->dateTime()

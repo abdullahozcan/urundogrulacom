@@ -29,6 +29,23 @@ class ProductForm
                     ->visible(fn () => auth()->user()?->isSuperAdmin())
                     ->dehydrated()
                     ->required(),
+                Select::make('category_id')
+                    ->label('Kategori')
+                    ->relationship('category', 'name', modifyQueryUsing: function (Builder $query, callable $get) {
+                        $user = auth()->user();
+                        $companyId = $get('company_id') ?? $user?->company_id;
+
+                        if ($user && !$user->isSuperAdmin()) {
+                            $query->where('company_id', $user->company_id);
+                            return;
+                        }
+
+                        if ($companyId) {
+                            $query->where('company_id', $companyId);
+                        }
+                    })
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('name')
                     ->required(),
                 Textarea::make('description')
@@ -44,6 +61,22 @@ class ProductForm
                     ->default('physical')
                     ->required()
                     ->live(),
+                Select::make('qr_mode')
+                    ->label('QR Modu')
+                    ->options([
+                        'unique' => 'Benzersiz (Tekil)',
+                        'general' => 'Genel (Ürüne Özel, Tekil Değil)',
+                    ])
+                    ->default('unique')
+                    ->required()
+                    ->live(),
+                TextInput::make('general_qr_code')
+                    ->label('Mevcut Genel QR Kodu')
+                    ->visible(fn ($get) => $get('qr_mode') === 'general')
+                    ->required(fn ($get) => $get('qr_mode') === 'general')
+                    ->minLength(3)
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 Select::make('digital_content_type')
                     ->label('İçerik Tipi')
                     ->options([

@@ -13,12 +13,19 @@ class Product extends Model
 
     protected $fillable = [
         'company_id',
+        'category_id',
         'name',
         'description',
         'image',
         'type',
         'digital_content_type',
         'digital_file_path',
+        'qr_mode',
+        'general_qr_code',
+    ];
+
+    protected $casts = [
+        'qr_mode' => 'string',
     ];
 
     public function company(): BelongsTo
@@ -29,5 +36,10 @@ class Product extends Model
     public function batches(): HasMany
     {
         return $this->hasMany(Batch::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }
