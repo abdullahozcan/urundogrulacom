@@ -91,7 +91,7 @@ Not: Eger tek urunde birden fazla genel QR desteklenecekse ayrik tabloya gecilec
 3. `Product` modeline: YAPILDI
    - `belongsTo category`
    - `qr_mode` cast/dogrulama
-4. Servis seviyesi validator: KISMEN YAPILDI
+4. Servis seviyesi validator: YAPILDI
    - cross-tenant category bagini engelle.
 
 ## 5. Filament Backlog'u
@@ -166,7 +166,7 @@ Durum: YAPILDI
    - `unique` ve `general` form dogrulamasi.
 3. `CrossTenantAssignmentTest`
    - farkli kurulus category_id atama denemesi reddedilir.
-4. `NavigationVisibilityTest`
+4. `NavigationVisibilityTest` - YAPILDI
    - super admin vs company user menuler.
 
 ## 9. Teknik Gorev Listesi (Uygulama Sirasi)
@@ -177,10 +177,10 @@ Durum: YAPILDI
 4. Model update: `Product`, `Company` - YAPILDI
 5. Filament Resource: `CategoryResource` - YAPILDI
 6. Product form/table update - YAPILDI
-7. Authorization policy/scope sertlestirme - KISMEN YAPILDI
-8. Seeder guncelleme (ornek kategori + rol) - KISMEN YAPILDI
-9. Feature testler - HENUZ YAPILMADI
-10. Smoke test + manuel panel kontrol - HENUZ YAPILMADI
+7. Authorization policy/scope sertlestirme - YAPILDI
+8. Seeder guncelleme (ornek kategori + rol) - YAPILDI
+9. Feature testler - YAPILDI
+10. Smoke test + manuel panel kontrol - KONTROL LISTESI HAZIRLANDI
 
 ## 10. Definition of Done (Faz 1)
 
@@ -190,3 +190,28 @@ Durum: YAPILDI
 4. `qr_mode` secimi ve `general_qr_code` dogrulamasi aktif.
 5. Super admin / company user gorunurluk farklari dogru.
 6. Kritik tenant testleri yesil.
+
+## 11. Smoke Test ve Manuel Kontrol Listesi
+
+Durum: HAZIRLANDI
+
+1. Super admin ile giris:
+   - `Sistem` menusu gorunuyor mu?
+   - `Company`, `User`, `Page`, `Post`, `Partner`, `Setting` ekranlari aciliyor mu?
+2. Company admin ile giris:
+   - `Sistem` menusu gorunmuyor mu?
+   - `Category` ve `Product` menuleri gorunuyor mu?
+3. Category izolasyonu:
+   - Company A kullanicisi Company B kategorisini listede gormuyor mu?
+   - URL ile B kategorisi acilmaya calisinca erisim engelleniyor mu?
+4. Product izolasyonu:
+   - Company A kullanicisi Company B urununu listede gormuyor mu?
+   - URL ile B urunu acilmaya calisinca erisim engelleniyor mu?
+5. Product form:
+   - `qr_mode=general` secilince `general_qr_code` alani zorunlu gorunuyor mu?
+   - `qr_mode=unique` secilince `general_qr_code` saklanmiyor mu?
+6. Category bagi:
+   - Product kaydinda farkli kurulus kategorisi secimi engelleniyor mu?
+7. Seeder kontrolu:
+   - `superadmin@example.com` ve `companyadmin@example.com` hesaplari olusuyor mu?
+   - `Demo Company` ve `Genel Kategori` seed kayitlari mevcut mu?

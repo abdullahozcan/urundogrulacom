@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Items\Schemas;
 
+use App\Models\Product;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class ItemForm
 {
@@ -20,7 +23,22 @@ class ItemForm
                 TextInput::make('uuid')
                     ->label('UUID')
                     ->required()
-                    ->disabled(),
+                    ->uuid()
+                    ->unique(ignoreRecord: true)
+                    ->rule(function () {
+                        return function (string $attribute, $value, \Closure $fail): void {
+                            if (Product::query()->where('general_qr_code', $value)->exists()) {
+                                $fail('Bu UUID zaten kullaniliyor.');
+                            }
+                        };
+                    })
+                    ->disabled(fn (string $operation): bool => $operation === 'edit')
+                    ->suffixAction(
+                        Action::make('generate_uuid')
+                            ->label('Otomatik Oluştur')
+                            ->action(fn (callable $set) => $set('uuid', (string) Str::uuid()))
+                            ->visible(fn (string $operation): bool => $operation === 'create')
+                    ),
                 Toggle::make('is_scanned')
                     ->label('Okutuldu mu?')
                     ->disabled(),

@@ -51,6 +51,27 @@ class CategoryResource extends Resource
         return $query->where('company_id', $user->company_id);
     }
 
+    public static function canView($record): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        return $user->isSuperAdmin() || (int) $record->company_id === (int) $user->company_id;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return static::canView($record);
+    }
+
+    public static function canDelete($record): bool
+    {
+        return static::canView($record);
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -67,4 +88,3 @@ class CategoryResource extends Resource
         ];
     }
 }
-

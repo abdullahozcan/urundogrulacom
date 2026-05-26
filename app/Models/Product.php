@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 class Product extends Model
 {
@@ -27,6 +28,27 @@ class Product extends Model
     protected $casts = [
         'qr_mode' => 'string',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product): void {
+            if ($product->qr_mode !== 'general') {
+                $product->general_qr_code = null;
+            }
+
+            if (!$product->category_id) {
+                return;
+            }
+
+            $category = Category::query()->find($product->category_id);
+
+            if (!$category || (int) $category->company_id !== (int) $product->company_id) {
+                throw ValidationException::withMessages([
+                    'category_id' => 'Secilen kategori bu urunun kurulusuna ait degil.',
+                ]);
+            }
+        });
+    }
 
     public function company(): BelongsTo
     {

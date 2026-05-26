@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -18,6 +20,10 @@ class DatabaseSeeder extends Seeder
     {
         $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
         $companyAdminRole = Role::firstOrCreate(['name' => 'company_admin', 'guard_name' => 'web']);
+        $company = Company::firstOrCreate(
+            ['name' => 'Demo Company'],
+            ['is_active' => true]
+        );
 
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@example.com'],
@@ -34,8 +40,17 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Company Admin',
                 'password' => 'password',
+                'company_id' => $company->id,
             ]
         );
         $companyAdmin->assignRole($companyAdminRole);
+
+        Category::firstOrCreate(
+            ['company_id' => $company->id, 'slug' => 'genel-kategori'],
+            [
+                'name' => 'Genel Kategori',
+                'is_active' => true,
+            ]
+        );
     }
 }
