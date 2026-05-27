@@ -7,7 +7,9 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +20,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
         $companyAdminRole = Role::firstOrCreate(['name' => 'company_admin', 'guard_name' => 'web']);
         $company = Company::firstOrCreate(
@@ -34,6 +38,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $superAdmin->assignRole($superAdminRole);
+        $superAdminRole->syncPermissions(Permission::query()->pluck('name')->all());
 
         $companyAdmin = User::firstOrCreate(
             ['email' => 'companyadmin@example.com'],

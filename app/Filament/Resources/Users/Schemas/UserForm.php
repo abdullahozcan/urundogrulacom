@@ -6,6 +6,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Spatie\Permission\Models\Role;
 
 class UserForm
 {
@@ -26,6 +27,17 @@ class UserForm
                     ->dehydrated(fn ($state) => filled($state)),
                 Select::make('company_id')
                     ->relationship('company', 'name'),
+                Select::make('roles')
+                    ->label('Rol')
+                    ->multiple()
+                    ->preload()
+                    ->relationship(
+                        'roles',
+                        'name',
+                        fn ($query) => $query->where('guard_name', 'web')->orderBy('name')
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Role $record): string => $record->name)
+                    ->searchable(),
             ]);
     }
 }

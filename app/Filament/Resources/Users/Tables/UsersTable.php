@@ -32,6 +32,11 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('company.name')
                     ->searchable(),
+                TextColumn::make('roles.name')
+                    ->label('Roller')
+                    ->badge()
+                    ->separator(', ')
+                    ->searchable(),
             ])
             ->filters([
                 //
