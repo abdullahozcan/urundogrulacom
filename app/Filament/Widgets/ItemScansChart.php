@@ -13,7 +13,7 @@ class ItemScansChart extends ChartWidget
         'xl' => 6,
     ];
 
-    protected int | string | null $maxHeight = 300;
+    protected ?string $maxHeight = '300';
 
     protected static ?int $sort = 3;
 
