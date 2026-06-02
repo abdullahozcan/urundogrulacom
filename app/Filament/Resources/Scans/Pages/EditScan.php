@@ -16,4 +16,11 @@ class EditScan extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\ScanLocationWidget::class,
+        ];
+    }
 }

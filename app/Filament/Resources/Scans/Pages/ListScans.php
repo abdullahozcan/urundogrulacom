@@ -16,4 +16,11 @@ class ListScans extends ListRecords
             CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\ScansMapWidget::class,
+        ];
+    }
 }
