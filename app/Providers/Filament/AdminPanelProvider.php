@@ -14,7 +14,6 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
-use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -49,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->widgets([
-                AccountWidget::class,
+                \App\Filament\Widgets\AccountWidget::class,
                 \App\Filament\Widgets\MapWidget::class,
                 \App\Filament\Widgets\TopScannedItemsWidget::class,
                 \App\Filament\Widgets\ItemScansChart::class,

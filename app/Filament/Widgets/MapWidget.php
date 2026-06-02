@@ -16,7 +16,7 @@ class MapWidget extends Widget
         'xl' => 6,
     ];
     
-    protected static ?int $sort = 1; // Put it at the top
+    protected static ?int $sort = 2;
 
     public function getScansProperty()
     {

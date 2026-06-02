@@ -9,9 +9,13 @@ class ItemScansChart extends ChartWidget
     public ?\Illuminate\Database\Eloquent\Model $record = null;
 
     protected int | string | array $columnSpan = [
-        'lg' => 5,
-        'xl' => 5,
+        'lg' => 6,
+        'xl' => 6,
     ];
+
+    protected int | string | null $maxHeight = 300;
+
+    protected static ?int $sort = 3;
 
     protected ?string $heading = 'Son 7 Gün Okutulma Grafiği';
 

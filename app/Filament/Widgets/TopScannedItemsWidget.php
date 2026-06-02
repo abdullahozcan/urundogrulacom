@@ -15,6 +15,8 @@ class TopScannedItemsWidget extends TableWidget
         'xl' => 6,
     ];
 
+    protected static ?int $sort = 4;
+
     public function table(Table $table): Table
     {
         $user = auth()->user();
