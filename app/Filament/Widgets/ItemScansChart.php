@@ -8,7 +8,10 @@ class ItemScansChart extends ChartWidget
 {
     public ?\Illuminate\Database\Eloquent\Model $record = null;
 
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = [
+        'lg' => 5,
+        'xl' => 5,
+    ];
 
     protected ?string $heading = 'Son 7 Gün Okutulma Grafiği';
 

@@ -10,7 +10,10 @@ class ScanHistoryWidget extends Widget
 
     protected string $view = 'filament.widgets.scan-history';
 
-    protected int | string | array $columnSpan = 2;
+    protected int | string | array $columnSpan = [
+        'lg' => 7,
+        'xl' => 7,
+    ];
 
     protected ?string $heading = 'Son 10 Okutulma';
 
