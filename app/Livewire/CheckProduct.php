@@ -6,7 +6,6 @@ use App\Models\Item;
 use App\Models\Scan;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Hisorange\BrowserDetect\Parser as Browser;
 
 class CheckProduct extends Component
 {
@@ -17,9 +16,9 @@ class CheckProduct extends Component
     public function mount($uuid)
     {
         $this->uuid = $uuid;
-        // Find item
+
         $this->item = Item::with(['batch.product.company'])->where('uuid', $uuid)->first();
-        
+
         if (!$this->item) {
             abort(404, 'Product not found or invalid QR code.');
         }
@@ -31,16 +30,15 @@ class CheckProduct extends Component
             return;
         }
 
-        $browser = Browser::browserName();
-        $deviceType = Browser::isMobile() ? 'Mobile' : (Browser::isTablet() ? 'Tablet' : 'Desktop');
+        $result = app('browser-detect')->detect();
 
         Scan::create([
             'item_id' => $this->item->id,
             'ip_address' => request()->ip(),
             'lat' => $lat,
             'lng' => $lng,
-            'browser' => $browser,
-            'device_type' => $deviceType,
+            'browser' => $result->browserName(),
+            'device_type' => $result->isMobile() ? 'Mobile' : ($result->isTablet() ? 'Tablet' : 'Desktop'),
         ]);
 
         $this->item->update(['is_scanned' => true]);
