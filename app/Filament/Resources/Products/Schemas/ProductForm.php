@@ -38,14 +38,12 @@ class ProductForm
                         $user = auth()->user();
                         $companyId = $get('company_id') ?? $user?->company_id;
 
-                        if ($user && !$user->isSuperAdmin()) {
-                            $query->where('company_id', $user->company_id);
+                        if (!$companyId) {
+                            $query->whereRaw('0 = 1');
                             return;
                         }
 
-                        if ($companyId) {
-                            $query->where('company_id', $companyId);
-                        }
+                        $query->where('company_id', $companyId);
                     })
                     ->searchable()
                     ->preload(),
