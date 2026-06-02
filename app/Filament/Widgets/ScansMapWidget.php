@@ -7,6 +7,8 @@ use Filament\Widgets\Widget;
 
 class ScansMapWidget extends Widget
 {
+    protected static bool $isLazy = false;
+
     protected string $view = 'filament.widgets.scans-map-widget';
 
     protected int | string | array $columnSpan = 'full';

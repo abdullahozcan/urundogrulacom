@@ -7,6 +7,8 @@ use Filament\Widgets\Widget;
 
 class MapWidget extends Widget
 {
+    protected static bool $isLazy = false;
+
     protected string $view = 'filament.widgets.map-widget';
     
     // Make sure it displays full width
