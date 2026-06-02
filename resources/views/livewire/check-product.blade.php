@@ -97,16 +97,16 @@
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
                             (position) => {
-                                @this.saveScanData(position.coords.latitude, position.coords.longitude);
+                                Livewire.dispatch('saveScan', { lat: position.coords.latitude, lng: position.coords.longitude });
                             },
                             (error) => {
                                 console.warn('Konum alınamadı: ', error.message);
-                                @this.saveScanData(null, null);
+                                Livewire.dispatch('saveScan', { lat: null, lng: null });
                             },
                             { timeout: 10000 }
                         );
                     } else {
-                        @this.saveScanData(null, null);
+                        Livewire.dispatch('saveScan', { lat: null, lng: null });
                     }
                 }
             }));

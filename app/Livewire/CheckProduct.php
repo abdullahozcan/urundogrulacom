@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Item;
 use App\Models\Scan;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CheckProduct extends Component
@@ -24,6 +25,7 @@ class CheckProduct extends Component
         }
     }
 
+    #[On('saveScan')]
     public function saveScanData($lat, $lng)
     {
         if ($this->scanSaved) {
