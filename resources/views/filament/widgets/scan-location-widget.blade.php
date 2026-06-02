@@ -21,9 +21,20 @@
                 </div>
             </div>
 
-            <a href="https://www.openstreetmap.org/?mlat={{ $scan->lat }}&mlon={{ $scan->lng }}&zoom=17&layers=M" target="_blank" rel="noopener noreferrer" class="text-xs text-primary-600 dark:text-primary-400 hover:underline mb-3 inline-block">
-                OpenStreetMap&rsquo;te a&ccedil; &rarr;
-            </a>
+            <x-filament::modal id="osm-modal" heading="OpenStreetMap" width="5xl" close-button>
+                <x-slot name="trigger" class="cursor-pointer text-xs text-primary-600 dark:text-primary-400 hover:underline mb-3 inline-block">
+                    OpenStreetMap&rsquo;te a&ccedil; &rarr;
+                </x-slot>
+                <iframe
+                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ $scan->lng - 0.01 }}%2C{{ $scan->lat - 0.01 }}%2C{{ $scan->lng + 0.01 }}%2C{{ $scan->lat + 0.01 }}&amp;layer=mapnik&amp;marker={{ $scan->lat }}%2C{{ $scan->lng }}"
+                    width="100%"
+                    height="500"
+                    style="border:0; border-radius: 0.5rem;"
+                    allowfullscreen
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+            </x-filament::modal>
 
             <div 
                 x-data="{
@@ -36,27 +47,30 @@
                             setTimeout(() => this.initMap(), 200);
                             return;
                         }
-                        this.$nextTick(() => {
-                            setTimeout(() => {
-                                this.mapLoaded = true;
-                                this.map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([this.lat, this.lng], 16);
-                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                    attribution: '&copy; OpenStreetMap contributors',
-                                    maxZoom: 19
-                                }).addTo(this.map);
-                                L.marker([this.lat, this.lng], {
-                                    icon: L.divIcon({
-                                        className: '',
-                                        html: '<div style=&quot;background:#ef4444;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 2px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;&quot;><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;white&quot;><path d=&quot;M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z&quot;/></svg></div>',
-                                        iconSize: [24, 24],
-                                        iconAnchor: [12, 24],
-                                        popupAnchor: [0, -24],
-                                    })
-                                }).addTo(this.map)
-                                .bindPopup('<div style=&quot;font-family:inherit;min-width:120px;&quot;><div style=&quot;font-weight:700;font-size:13px;color:#1f2937;&quot;>Okuma Konumu</div><div style=&quot;font-size:11px;color:#6b7280;&quot;>' + this.lat.toFixed(4) + ', ' + this.lng.toFixed(4) + '</div></div>')
-                                .openPopup();
-                            }, 100);
-                        });
+                        try {
+                            this.map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([this.lat, this.lng], 16);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; OpenStreetMap contributors',
+                                maxZoom: 19
+                            }).addTo(this.map);
+                            L.marker([this.lat, this.lng], {
+                                icon: L.divIcon({
+                                    className: '',
+                                    html: '<div style=&quot;background:#ef4444;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 2px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;&quot;><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;white&quot;><path d=&quot;M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z&quot;/></svg></div>',
+                                    iconSize: [24, 24],
+                                    iconAnchor: [12, 24],
+                                    popupAnchor: [0, -24],
+                                })
+                            }).addTo(this.map)
+                            .bindPopup('<div style=&quot;font-family:inherit;min-width:120px;&quot;><div style=&quot;font-weight:700;font-size:13px;color:#1f2937;&quot;>Okuma Konumu</div><div style=&quot;font-size:11px;color:#6b7280;&quot;>' + this.lat.toFixed(4) + ', ' + this.lng.toFixed(4) + '</div></div>')
+                            .openPopup();
+
+                            this.map.invalidateSize();
+                            this.mapLoaded = true;
+                        } catch (e) {
+                            console.error('ScanLocationWidget error:', e.message);
+                            setTimeout(() => this.initMap(), 500);
+                        }
                     }
                 }" 
                 x-init="initMap()" 
