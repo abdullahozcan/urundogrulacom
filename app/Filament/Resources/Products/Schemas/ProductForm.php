@@ -138,6 +138,7 @@ class ProductForm
                 FileUpload::make('digital_file_path')
                     ->label('Dijital Dosya')
                     ->directory('digital_products')
+                    ->live()
                     ->acceptedFileTypes(fn ($get) => $get('digital_content_type') === 'video'
                         ? ['video/mp4', 'video/quicktime']
                         : ['application/pdf'])
