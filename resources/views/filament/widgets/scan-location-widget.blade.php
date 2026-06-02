@@ -30,14 +30,16 @@
                     lat: {{ $scan->lat }},
                     lng: {{ $scan->lng }},
                     mapLoaded: false,
-                    initMap() {
-                        if (typeof L === 'undefined') {
-                            setTimeout(() => this.initMap(), 200);
-                            return;
-                        }
-                        this.$nextTick(() => {
+                    init() {
+                        const el = this.$el.querySelector('.map-inner');
+                        if (!el) return;
+
+                        const waitForL = setInterval(() => {
+                            if (typeof L === 'undefined') return;
+                            clearInterval(waitForL);
                             this.mapLoaded = true;
-                            const map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([this.lat, this.lng], 16);
+
+                            const map = L.map(el, { zoomControl: true, scrollWheelZoom: true }).setView([this.lat, this.lng], 16);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 attribution: '&copy; OpenStreetMap contributors',
                                 maxZoom: 19
@@ -53,13 +55,12 @@
                             }).addTo(map)
                             .bindPopup('<div style=&quot;font-family:inherit;min-width:120px;&quot;><div style=&quot;font-weight:700;font-size:13px;color:#1f2937;&quot;>Okuma Konumu</div><div style=&quot;font-size:11px;color:#6b7280;&quot;>' + this.lat.toFixed(4) + ', ' + this.lng.toFixed(4) + '</div></div>')
                             .openPopup();
-                        });
+                        }, 200);
                     }
                 }"
-                x-init="initMap()"
                 class="w-full h-64 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-0 relative"
-                x-ref="mapEl"
             >
+                <div class="w-full h-full map-inner"></div>
                 <div class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10" x-show="!mapLoaded">
                     <x-filament::loading-indicator class="h-8 w-8 text-primary-500" />
                 </div>

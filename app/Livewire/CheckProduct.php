@@ -32,15 +32,26 @@ class CheckProduct extends Component
             return;
         }
 
-        $result = app('browser-detect')->detect();
+        $browser = '-';
+        $deviceType = 'Desktop';
+
+        try {
+            $result = app('browser-detect')->detect();
+            $browser = $result->browserName();
+            $deviceType = $result->isMobile() ? 'Mobile' : ($result->isTablet() ? 'Tablet' : 'Desktop');
+        } catch (\Throwable $e) {
+            $agent = request()->userAgent();
+            $browser = $agent ? substr($agent, 0, 255) : '-';
+            $deviceType = preg_match('/mobile|android|iphone|ipad/i', $agent ?? '') ? 'Mobile' : 'Desktop';
+        }
 
         Scan::create([
             'item_id' => $this->item->id,
             'ip_address' => request()->ip(),
             'lat' => $lat,
             'lng' => $lng,
-            'browser' => $result->browserName(),
-            'device_type' => $result->isMobile() ? 'Mobile' : ($result->isTablet() ? 'Tablet' : 'Desktop'),
+            'browser' => $browser,
+            'device_type' => $deviceType,
         ]);
 
         $this->item->update(['is_scanned' => true]);
