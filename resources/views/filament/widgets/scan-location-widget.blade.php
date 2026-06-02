@@ -22,41 +22,38 @@
             </div>
 
             <a href="https://www.openstreetmap.org/?mlat={{ $scan->lat }}&mlon={{ $scan->lng }}&zoom=17&layers=M" target="_blank" rel="noopener noreferrer" class="text-xs text-primary-600 dark:text-primary-400 hover:underline mb-3 inline-block">
-                OpenStreetMap'te aç &rarr;
+                OpenStreetMap&rsquo;te a&ccedil; &rarr;
             </a>
 
             <div
                 x-data="{
+                    lat: {{ $scan->lat }},
+                    lng: {{ $scan->lng }},
                     mapLoaded: false,
                     initMap() {
                         if (typeof L === 'undefined') {
                             setTimeout(() => this.initMap(), 200);
                             return;
                         }
-                        setTimeout(() => {
+                        this.$nextTick(() => {
                             this.mapLoaded = true;
-                            const map = L.map($refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([{{ $scan->lat }}, {{ $scan->lng }}], 16);
+                            const map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([this.lat, this.lng], 16);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>',
+                                attribution: '&copy; OpenStreetMap contributors',
                                 maxZoom: 19
                             }).addTo(map);
-                            L.marker([{{ $scan->lat }}, {{ $scan->lng }}], {
+                            L.marker([this.lat, this.lng], {
                                 icon: L.divIcon({
                                     className: '',
-                                    html: '<div style=\"background:#ef4444;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 2px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z\"/></svg></div>',
+                                    html: '<div style=&quot;background:#ef4444;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 2px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;&quot;><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;white&quot;><path d=&quot;M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z&quot;/></svg></div>',
                                     iconSize: [24, 24],
                                     iconAnchor: [12, 24],
                                     popupAnchor: [0, -24],
                                 })
                             }).addTo(map)
-                            .bindPopup(`
-                                <div style="font-family:inherit;min-width:120px;">
-                                    <div style="font-weight:700;font-size:13px;color:#1f2937;">Okuma Konumu</div>
-                                    <div style="font-size:11px;color:#6b7280;">{{ number_format($scan->lat, 4) }}, {{ number_format($scan->lng, 4) }}</div>
-                                </div>
-                            `)
+                            .bindPopup('<div style=&quot;font-family:inherit;min-width:120px;&quot;><div style=&quot;font-weight:700;font-size:13px;color:#1f2937;&quot;>Okuma Konumu</div><div style=&quot;font-size:11px;color:#6b7280;&quot;>' + this.lat.toFixed(4) + ', ' + this.lng.toFixed(4) + '</div></div>')
                             .openPopup();
-                        }, 300);
+                        });
                     }
                 }"
                 x-init="initMap()"
@@ -70,7 +67,7 @@
         @else
             <div class="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
                 <x-filament::icon alias="heroicon-o-map-pin" class="w-12 h-12 mb-3" />
-                <p class="text-sm">Bu okuma için konum bilgisi bulunmuyor.</p>
+                <p class="text-sm">Bu okuma i&ccedil;in konum bilgisi bulunmuyor.</p>
             </div>
         @endif
     </x-filament::section>

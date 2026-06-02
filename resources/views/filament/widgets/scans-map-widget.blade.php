@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
-            Okuma Konumları
+            Okuma Konumlar&imath;
         </x-slot>
 
         <div
@@ -14,17 +14,17 @@
                         setTimeout(() => this.initMap(), 200);
                         return;
                     }
-                    setTimeout(() => {
+                    this.$nextTick(() => {
                         this.mapLoaded = true;
-                        this.map = L.map($refs.mapEl).setView([39.0, 35.0], 5);
+                        this.map = L.map(this.$refs.mapEl).setView([39.0, 35.0], 5);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>',
+                            attribution: '&copy; OpenStreetMap contributors',
                             maxZoom: 19
                         }).addTo(this.map);
 
                         const icon = L.divIcon({
                             className: '',
-                            html: '<div style=\"background:#0e42ff;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);\"></div>',
+                            html: '<div style=&quot;background:#0e42ff;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);&quot;></div>',
                             iconSize: [14, 14],
                             iconAnchor: [7, 7],
                         });
@@ -34,14 +34,7 @@
                             this.scans.forEach(scan => {
                                 if (scan.lat && scan.lng) {
                                     const marker = L.marker([scan.lat, scan.lng], { icon }).addTo(this.map);
-                                    marker.bindPopup(`
-                                        <div style="font-family:inherit;min-width:160px;">
-                                            <div style="font-weight:700;margin-bottom:4px;color:#1f2937;font-size:13px;">${scan.product_name}</div>
-                                            <div style="font-size:11px;color:#6b7280;margin-bottom:2px;">Parti: ${scan.batch_number}</div>
-                                            <div style="font-size:11px;color:#6b7280;margin-bottom:2px;">${scan.date}</div>
-                                            <div style="font-size:11px;color:#6b7280;">${scan.device} &middot; ${scan.browser}</div>
-                                        </div>
-                                    `);
+                                    marker.bindPopup('<div style=&quot;font-family:inherit;min-width:160px;&quot;><div style=&quot;font-weight:700;margin-bottom:4px;color:#1f2937;font-size:13px;&quot;>' + scan.product_name + '</div><div style=&quot;font-size:11px;color:#6b7280;margin-bottom:2px;&quot;>Parti: ' + scan.batch_number + '</div><div style=&quot;font-size:11px;color:#6b7280;margin-bottom:2px;&quot;>' + scan.date + '</div><div style=&quot;font-size:11px;color:#6b7280;&quot;>' + scan.device + ' &middot; ' + scan.browser + '</div></div>');
                                     bounds.extend([scan.lat, scan.lng]);
                                 }
                             });
@@ -49,7 +42,7 @@
                                 this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
                             }
                         }
-                    }, 300);
+                    });
                 }
             }"
             x-init="initMap()"
