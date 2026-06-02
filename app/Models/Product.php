@@ -23,10 +23,20 @@ class Product extends Model
         'digital_file_path',
         'qr_mode',
         'general_qr_code',
+        'expiration_date',
+        'serial_number',
+        'youtube_url',
+        'website_url',
+        'instagram_url',
+        'facebook_url',
+        'twitter_url',
+        'tiktok_url',
+        'linkedin_url',
     ];
 
     protected $casts = [
         'qr_mode' => 'string',
+        'expiration_date' => 'date',
     ];
 
     protected static function booted(): void
@@ -63,5 +73,16 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getYoutubeEmbedUrlAttribute(): ?string
+    {
+        if (!$this->youtube_url) {
+            return null;
+        }
+
+        preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $this->youtube_url, $matches);
+
+        return isset($matches[1]) ? "https://www.youtube.com/embed/{$matches[1]}" : null;
     }
 }

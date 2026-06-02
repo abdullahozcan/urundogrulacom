@@ -41,6 +41,10 @@ class EditProduct extends EditRecord
             }
         }
 
+        if (($data['digital_content_type'] ?? null) !== 'video') {
+            $data['youtube_url'] = null;
+        }
+
         return $data;
     }
 }

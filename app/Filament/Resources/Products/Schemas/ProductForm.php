@@ -4,10 +4,12 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Models\Item;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -49,8 +51,12 @@ class ProductForm
                     ->preload(),
                 TextInput::make('name')
                     ->required(),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->columnSpanFull(),
+                DatePicker::make('expiration_date')
+                    ->label('Son Kullanma Tarihi'),
+                TextInput::make('serial_number')
+                    ->label('Seri Numaras&imath;'),
                 FileUpload::make('image')
                     ->image(),
                 Select::make('type')
@@ -62,6 +68,35 @@ class ProductForm
                     ->default('physical')
                     ->required()
                     ->live(),
+                Section::make('Sosyal Medya')
+                    ->description('Ürünün sosyal medya hesaplar&imath; (isteğe bağl&imath;)')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('website_url')
+                            ->label('Web Sitesi')
+                    ->url()
+                    ->placeholder('https://example.com'),
+                        TextInput::make('instagram_url')
+                            ->label('Instagram')
+                    ->url()
+                    ->placeholder('https://instagram.com/...'),
+                        TextInput::make('facebook_url')
+                            ->label('Facebook')
+                    ->url()
+                    ->placeholder('https://facebook.com/...'),
+                        TextInput::make('twitter_url')
+                            ->label('Twitter / X')
+                    ->url()
+                    ->placeholder('https://twitter.com/...'),
+                        TextInput::make('tiktok_url')
+                            ->label('TikTok')
+                    ->url()
+                    ->placeholder('https://tiktok.com/@...'),
+                        TextInput::make('linkedin_url')
+                            ->label('LinkedIn')
+                    ->url()
+                    ->placeholder('https://linkedin.com/in/...'),
+                    ]),
                 Select::make('qr_mode')
                     ->label('QR Modu')
                     ->options([
@@ -103,10 +138,20 @@ class ProductForm
                 FileUpload::make('digital_file_path')
                     ->label('Dijital Dosya')
                     ->directory('digital_products')
-                    ->acceptedFileTypes(['application/pdf', 'video/mp4', 'video/quicktime'])
-                    ->maxSize(51200) // 50MB
+                    ->acceptedFileTypes(fn ($get) => $get('digital_content_type') === 'video'
+                        ? ['video/mp4', 'video/quicktime']
+                        : ['application/pdf'])
+                    ->maxSize(51200)
                     ->visible(fn ($get) => $get('type') === 'digital')
-                    ->required(fn ($get) => $get('type') === 'digital'),
+                    ->disabled(fn ($get) => $get('type') === 'digital' && $get('digital_content_type') === 'video' && filled($get('youtube_url')))
+                    ->required(fn ($get) => $get('type') === 'digital' && ($get('digital_content_type') !== 'video' || blank($get('youtube_url')))),
+                TextInput::make('youtube_url')
+                    ->label('YouTube Linki')
+                    ->placeholder('https://youtube.com/watch?v=...')
+                    ->url()
+                    ->visible(fn ($get) => $get('type') === 'digital' && $get('digital_content_type') === 'video')
+                    ->disabled(fn ($get) => filled($get('digital_file_path')))
+                    ->required(fn ($get) => $get('type') === 'digital' && $get('digital_content_type') === 'video' && blank($get('digital_file_path'))),
             ]);
     }
 }

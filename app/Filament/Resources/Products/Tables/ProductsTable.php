@@ -30,7 +30,14 @@ class ProductsTable
                 TextColumn::make('general_qr_code')
                     ->label('Genel QR')
                     ->toggleable(isToggledHiddenByDefault: true),
-                ImageColumn::make('image'),
+                TextColumn::make('serial_number')
+                    ->label('Seri No')
+                    ->searchable(),
+                TextColumn::make('expiration_date')
+                    ->label('Son Kullanma')
+                    ->date('d.m.Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
