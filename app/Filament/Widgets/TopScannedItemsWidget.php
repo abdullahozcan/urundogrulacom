@@ -10,7 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class TopScannedItemsWidget extends TableWidget
 {
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = [
+        'lg' => 6,
+        'xl' => 6,
+    ];
 
     public function table(Table $table): Table
     {

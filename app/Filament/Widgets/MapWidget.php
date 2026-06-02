@@ -11,8 +11,10 @@ class MapWidget extends Widget
 
     protected string $view = 'filament.widgets.map-widget';
     
-    // Make sure it displays full width
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = [
+        'lg' => 6,
+        'xl' => 6,
+    ];
     
     protected static ?int $sort = 1; // Put it at the top
 
