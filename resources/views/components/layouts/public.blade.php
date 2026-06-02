@@ -124,9 +124,9 @@
 <body class="bg-background text-on-background selection:bg-secondary-fixed-dim flex flex-col min-h-screen">
     <!-- TopNavBar -->
     <header class="docked full-width top-0 sticky z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
-            <div class="flex items-center gap-8">
-                <a class="text-2xl font-black tracking-tighter text-slate-900" href="/">urundogrula.com</a>
+        <div class="flex justify-between items-center w-full px-4 sm:px-6 py-3 sm:py-4 max-w-screen-2xl mx-auto">
+            <div class="flex items-center gap-4 sm:gap-8 min-w-0">
+                <a class="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 shrink-0" href="/">urundogrula.com</a>
                 <nav class="hidden md:flex items-center gap-6 font-['Inter'] tracking-tight font-medium text-sm">
                     <a class="text-blue-600 border-b-2 border-blue-600 font-bold pb-1 transition-transform scale-95 active:scale-90" href="/">Doğrula</a>
                     <a class="text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 transition-all duration-300 px-2 py-1 rounded-lg" href="#">Markalar</a>
@@ -134,14 +134,14 @@
                     <a class="text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 transition-all duration-300 px-2 py-1 rounded-lg" href="#">Kurumsal</a>
                 </nav>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 <div class="hidden lg:flex items-center bg-slate-100 px-3 py-1.5 rounded-full">
                     <span class="material-symbols-outlined text-slate-400 text-sm mr-2">search</span>
                     <input class="bg-transparent border-none focus:ring-0 text-xs w-32 outline-none" placeholder="{{ \App\Helpers\SettingHelper::get('search_placeholder', 'Marka ara...') }}" type="text" />
                 </div>
                 
                 <!-- Language Switcher -->
-                <div class="relative group">
+                <div class="hidden sm:block relative group">
                     <button class="flex items-center gap-1 text-sm font-semibold text-slate-600 hover:text-slate-900 uppercase">
                         {{ app()->getLocale() }}
                         <span class="material-symbols-outlined text-sm">expand_more</span>
@@ -155,7 +155,7 @@
                     </div>
                 </div>
 
-                <a href="/admin" class="bg-primary-container text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition-transform active:scale-95">
+                <a href="/admin" class="bg-primary-container text-white px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold hover:opacity-90 transition-transform active:scale-95 whitespace-nowrap">
                     {{ \App\Helpers\SettingHelper::get('login_button', 'Giriş Yap') }}
                 </a>
             </div>
