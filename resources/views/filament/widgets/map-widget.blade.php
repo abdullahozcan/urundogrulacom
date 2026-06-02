@@ -15,9 +15,6 @@
 
     <x-filament::modal id="dashboard-map-modal" heading="Okuma Konumlar&imath;" width="7xl" close-button>
         <div
-            class="-m-6"
-        >
-        <div
             x-data="{
                 scans: {{ json_encode($this->scans) }},
                 mapLoaded: true,
@@ -74,13 +71,12 @@
                 }
             }"
             x-on:open-modal.window="if ($event.detail.id === 'dashboard-map-modal') { $nextTick(() => initMap()); }"
-            class="w-full h-[80vh] min-h-[400px] rounded-xl overflow-hidden z-0 relative"
+            class="w-full h-[75vh] min-h-[500px] -m-6 rounded-none overflow-hidden z-0 relative"
             x-ref="mapEl"
         >
             <div class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10" x-show="!mapLoaded">
                 <x-filament::loading-indicator class="h-8 w-8 text-primary-500" />
             </div>
-        </div>
         </div>
     </x-filament::modal>
 </x-filament-widgets::widget>
