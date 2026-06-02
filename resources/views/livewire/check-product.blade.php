@@ -12,6 +12,17 @@
 
     @php $product = $item->batch->product; @endphp
 
+    {{-- Scan Status (top) --}}
+    @if($scanSaved)
+        <div class="rounded-2xl p-6 text-center animate-fade-in bg-green-600">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-3xl text-white">check_circle</span>
+            </div>
+            <p class="text-white font-semibold text-lg">Bu ürün başarıyla doğrulandı.</p>
+            <p class="text-sm text-white/80 mt-1">Doğrulama kaydınız oluşturuldu.</p>
+        </div>
+    @endif
+
     {{-- Digital Content --}}
     @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url))
         <div class="glass rounded-2xl overflow-hidden animate-fade-in" x-data="{ mediaOpen: false }">
@@ -163,17 +174,6 @@
             @endif
         </div>
     </div>
-
-    {{-- Scan Status --}}
-    @if($scanSaved)
-        <div class="glass rounded-2xl p-6 text-center animate-fade-in">
-            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-3xl text-green-600">check_circle</span>
-            </div>
-            <p class="text-green-700 font-semibold">Bu ürün başarıyla doğrulandı.</p>
-            <p class="text-sm text-gray-500 mt-1">Doğrulama kaydınız oluşturuldu.</p>
-        </div>
-    @endif
 </div>
 
 <script>
