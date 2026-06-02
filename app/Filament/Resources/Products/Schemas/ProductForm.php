@@ -58,7 +58,8 @@ class ProductForm
                 TextInput::make('serial_number')
                     ->label('Seri Numaras&imath;'),
                 FileUpload::make('image')
-                    ->image(),
+                    ->image()
+                    ->disk('public'),
                 Select::make('type')
                     ->label('Ürün Tipi')
                     ->options([
@@ -138,6 +139,7 @@ class ProductForm
                 FileUpload::make('digital_file_path')
                     ->label('Dijital Dosya')
                     ->directory('digital_products')
+                    ->disk('public')
                     ->live()
                     ->acceptedFileTypes(fn ($get) => $get('digital_content_type') === 'video'
                         ? ['video/mp4', 'video/quicktime']
