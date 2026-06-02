@@ -14,12 +14,14 @@
 
     {{-- Scan Status (top) --}}
     @if($scanSaved)
-        <div class="rounded-2xl p-6 text-center animate-fade-in bg-green-600">
-            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white/20 flex items-center justify-center">
-                <span class="material-symbols-outlined text-3xl text-white">check_circle</span>
+        <div class="rounded-2xl px-4 py-3 sm:p-5 text-center animate-fade-in bg-green-600">
+            <div class="flex items-center justify-center gap-2 sm:gap-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-lg sm:text-xl text-white">check_circle</span>
+                </div>
+                <p class="text-white font-semibold text-sm sm:text-base">Bu ürün başarıyla doğrulandı.</p>
             </div>
-            <p class="text-white font-semibold text-lg">Bu ürün başarıyla doğrulandı.</p>
-            <p class="text-sm text-white/80 mt-1">Doğrulama kaydınız oluşturuldu.</p>
+            <p class="text-xs text-white/70 mt-1">Doğrulama kaydınız oluşturuldu.</p>
         </div>
     @endif
 
