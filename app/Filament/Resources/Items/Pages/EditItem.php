@@ -21,6 +21,7 @@ class EditItem extends EditRecord
     {
         return [
             \App\Filament\Widgets\ItemScansChart::class,
+            \App\Filament\Widgets\ScanHistoryWidget::class,
         ];
     }
 }
