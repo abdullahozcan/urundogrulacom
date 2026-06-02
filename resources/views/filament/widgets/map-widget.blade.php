@@ -15,6 +15,9 @@
 
     <x-filament::modal id="dashboard-map-modal" heading="Okuma Konumlar&imath;" width="7xl" close-button>
         <div
+            class="-m-6"
+        >
+        <div
             x-data="{
                 scans: {{ json_encode($this->scans) }},
                 mapLoaded: true,
@@ -26,7 +29,8 @@
                     }
                     try {
                         this.mapLoaded = false;
-                        this.map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([39.0, 35.0], 5);
+                        const el = this.$refs.mapEl;
+                        this.map = L.map(el, { zoomControl: true, scrollWheelZoom: true }).setView([39.0, 35.0], 5);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors',
                             maxZoom: 19
@@ -61,6 +65,7 @@
                         }
 
                         this.map.invalidateSize();
+                        setTimeout(() => { if (this.map) this.map.invalidateSize(); }, 400);
                         this.mapLoaded = true;
                     } catch (e) {
                         console.error('MapWidget error:', e.message);
@@ -69,12 +74,13 @@
                 }
             }"
             x-on:open-modal.window="if ($event.detail.id === 'dashboard-map-modal') { $nextTick(() => initMap()); }"
-            class="w-full h-[500px] rounded-xl overflow-hidden z-0 relative"
+            class="w-full h-[80vh] min-h-[400px] rounded-xl overflow-hidden z-0 relative"
             x-ref="mapEl"
         >
             <div class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10" x-show="!mapLoaded">
                 <x-filament::loading-indicator class="h-8 w-8 text-primary-500" />
             </div>
+        </div>
         </div>
     </x-filament::modal>
 </x-filament-widgets::widget>
