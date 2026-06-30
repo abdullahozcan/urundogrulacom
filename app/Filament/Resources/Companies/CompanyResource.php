@@ -48,7 +48,7 @@ class CompanyResource extends Resource
             return true;
         }
 
-        $company = Company::find($user->getActiveCompanyId());
+        $company = Company::find($user->company_id);
 
         return $company && is_null($company->parent_id);
     }
@@ -65,7 +65,7 @@ class CompanyResource extends Resource
             return true;
         }
 
-        $company = Company::find($user->getActiveCompanyId());
+        $company = Company::find($user->company_id);
 
         return $company && is_null($company->parent_id);
     }
