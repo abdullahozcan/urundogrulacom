@@ -16,18 +16,19 @@ class BatchForm
                 Select::make('product_id')
                     ->relationship('product', 'name', modifyQueryUsing: function (Builder $query) {
                         $user = auth()->user();
-                        $companyId = $user?->company_id;
 
                         if (!$user || $user->isSuperAdmin()) {
                             return;
                         }
 
-                        if (!$companyId) {
+                        $companyIds = $user->getAccessibleCompanyIds();
+
+                        if (empty($companyIds)) {
                             $query->whereRaw('0 = 1');
                             return;
                         }
 
-                        $query->where('company_id', $companyId);
+                        $query->whereIn('company_id', $companyIds);
                     })
                     ->required(),
                 TextInput::make('batch_number')

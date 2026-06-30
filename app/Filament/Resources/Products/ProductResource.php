@@ -48,7 +48,7 @@ class ProductResource extends Resource
             return $query;
         }
 
-        return $query->where('company_id', $user->company_id);
+        return $query->whereIn('company_id', $user->getAccessibleCompanyIds());
     }
 
     public static function canView($record): bool
@@ -59,7 +59,7 @@ class ProductResource extends Resource
             return false;
         }
 
-        return $user->isSuperAdmin() || (int) $record->company_id === (int) $user->company_id;
+        return $user->isSuperAdmin() || in_array((int) $record->company_id, $user->getAccessibleCompanyIds());
     }
 
     public static function canEdit($record): bool

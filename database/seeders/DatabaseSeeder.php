@@ -40,6 +40,18 @@ class DatabaseSeeder extends Seeder
         $superAdmin->assignRole($superAdminRole);
         $superAdminRole->syncPermissions(Permission::query()->pluck('name')->all());
 
+        $company->update(['max_sub_companies' => 5]);
+
+        $subCompanyA = Company::firstOrCreate(
+            ['name' => 'Demo Alt Firma A'],
+            ['is_active' => true, 'parent_id' => $company->id]
+        );
+
+        $subCompanyB = Company::firstOrCreate(
+            ['name' => 'Demo Alt Firma B'],
+            ['is_active' => true, 'parent_id' => $company->id]
+        );
+
         $companyAdmin = User::firstOrCreate(
             ['email' => 'companyadmin@example.com'],
             [
@@ -49,6 +61,24 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $companyAdmin->assignRole($companyAdminRole);
+
+        User::firstOrCreate(
+            ['email' => 'subcompany_a@example.com'],
+            [
+                'name' => 'Alt Firma A Admin',
+                'password' => 'password',
+                'company_id' => $subCompanyA->id,
+            ]
+        )->assignRole($companyAdminRole);
+
+        User::firstOrCreate(
+            ['email' => 'subcompany_b@example.com'],
+            [
+                'name' => 'Alt Firma B Admin',
+                'password' => 'password',
+                'company_id' => $subCompanyB->id,
+            ]
+        )->assignRole($companyAdminRole);
 
         Category::firstOrCreate(
             ['company_id' => $company->id, 'slug' => 'genel-kategori'],

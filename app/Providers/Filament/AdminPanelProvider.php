@@ -14,12 +14,14 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentView;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -30,6 +32,11 @@ class AdminPanelProvider extends PanelProvider
             Css::make('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'),
             Js::make('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'),
         ], package: 'app');
+
+        FilamentView::registerRenderHook(
+            'panels::sidebar.start',
+            fn (): string => Blade::render('@livewire(\'App\Livewire\CompanySwitcher\')'),
+        );
     }
 
     public function panel(Panel $panel): Panel

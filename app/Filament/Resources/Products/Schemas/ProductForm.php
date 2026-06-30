@@ -28,7 +28,7 @@ class ProductForm
                             return;
                         }
 
-                        $query->whereKey($user->company_id);
+                        $query->whereIn('id', $user->getAccessibleCompanyIds());
                     })
                     ->default(fn () => auth()->user()?->company_id)
                     ->visible(fn () => auth()->user()?->isSuperAdmin())
@@ -38,7 +38,7 @@ class ProductForm
                     ->label('Kategori')
                     ->relationship('category', 'name', modifyQueryUsing: function (Builder $query, callable $get) {
                         $user = auth()->user();
-                        $companyId = $get('company_id') ?? $user?->company_id;
+                        $companyId = $get('company_id') ?? $user?->getActiveCompanyId();
 
                         if (!$companyId) {
                             $query->whereRaw('0 = 1');

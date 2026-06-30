@@ -26,17 +26,43 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Sistem';
+        $user = auth()->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        return $user->isSuperAdmin() ? 'Sistem' : 'Firma Yönetimi';
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $user->company_id !== null;
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $user->company_id !== null;
     }
 
     public static function form(Schema $schema): Schema
@@ -58,7 +84,7 @@ class UserResource extends Resource
             return $query;
         }
 
-        return $query->where('company_id', $user->company_id);
+        return $query->whereIn('company_id', $user->getAccessibleCompanyIds());
     }
 
     public static function getRelations(): array

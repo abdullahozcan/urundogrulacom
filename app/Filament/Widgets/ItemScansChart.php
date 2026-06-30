@@ -35,7 +35,7 @@ class ItemScansChart extends ChartWidget
 
                 if ($user && !$user->isSuperAdmin()) {
                     $query->whereHas('item.batch.product', function ($q) use ($user) {
-                        $q->where('company_id', $user->company_id);
+                        $q->whereIn('company_id', $user->getAccessibleCompanyIds());
                     });
                 }
 

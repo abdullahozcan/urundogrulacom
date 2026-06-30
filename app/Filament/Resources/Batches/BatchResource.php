@@ -49,7 +49,7 @@ class BatchResource extends Resource
         }
 
         return $query->whereHas('product', function (Builder $q) use ($user) {
-            $q->where('company_id', $user->company_id);
+            $q->whereIn('company_id', $user->getAccessibleCompanyIds());
         });
     }
 

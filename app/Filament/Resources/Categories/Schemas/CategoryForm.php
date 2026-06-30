@@ -24,9 +24,9 @@ class CategoryForm
                             return;
                         }
 
-                        $query->whereKey($user->company_id);
+                        $query->whereIn('id', $user->getAccessibleCompanyIds());
                     })
-                    ->default(fn () => auth()->user()?->company_id)
+                    ->default(fn () => auth()->user()?->getActiveCompanyId())
                     ->visible(fn () => auth()->user()?->isSuperAdmin())
                     ->dehydrated()
                     ->required(),
@@ -40,7 +40,7 @@ class CategoryForm
                             return;
                         }
 
-                        $query->where('company_id', $user->company_id)->whereNull('parent_id');
+                        $query->whereIn('company_id', $user->getAccessibleCompanyIds())->whereNull('parent_id');
                     })
                     ->searchable()
                     ->preload(),

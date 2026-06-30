@@ -19,11 +19,6 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -45,5 +40,28 @@ class User extends Authenticatable
     public function isCompanyScoped(): bool
     {
         return !$this->isSuperAdmin();
+    }
+
+    public function getActiveCompanyId(): ?int
+    {
+        if ($this->isSuperAdmin()) {
+            return null;
+        }
+
+        return session('active_company_id', $this->company_id);
+    }
+
+    public function getAccessibleCompanyIds(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return Company::pluck('id')->toArray();
+        }
+
+        return $this->company?->accessibleCompanyIds() ?? [$this->company_id];
+    }
+
+    public function canAccessCompany(Company $company): bool
+    {
+        return in_array($company->id, $this->getAccessibleCompanyIds());
     }
 }

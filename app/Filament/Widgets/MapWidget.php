@@ -31,7 +31,7 @@ class MapWidget extends Widget
         $user = auth()->user();
         if ($user && !$user->isSuperAdmin() && $user->company_id) {
             $query->whereHas('item.batch.product', function ($q) use ($user) {
-                $q->where('company_id', $user->company_id);
+                $q->whereIn('company_id', $user->getAccessibleCompanyIds());
             });
         }
         

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Companies;
 use App\Filament\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Resources\Companies\Pages\EditCompany;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
+use App\Filament\Resources\Companies\RelationManagers\ChildrenRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
 use App\Models\Company;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CompanyResource extends Resource
 {
@@ -21,21 +23,47 @@ class CompanyResource extends Resource
     protected static ?string $modelLabel = 'Firma';
     protected static ?string $pluralModelLabel = 'Firmalar';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Sistem';
+        $user = auth()->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        return $user->isSuperAdmin() ? 'Sistem' : 'Firma Yönetimi';
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $user->company_id !== null;
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $user->company_id !== null;
     }
 
     public static function form(Schema $schema): Schema
@@ -48,10 +76,25 @@ class CompanyResource extends Resource
         return CompaniesTable::configure($table);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (!$user || $user->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('id', $user->company_id)
+              ->orWhere('parent_id', $user->company_id);
+        });
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            ChildrenRelationManager::class,
         ];
     }
 
