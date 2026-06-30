@@ -44,7 +44,13 @@ class CompanyResource extends Resource
             return false;
         }
 
-        return $user->isSuperAdmin();
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $company = Company::find($user->getActiveCompanyId());
+
+        return $company && is_null($company->parent_id);
     }
 
     public static function canViewAny(): bool
@@ -55,7 +61,13 @@ class CompanyResource extends Resource
             return false;
         }
 
-        return $user->isSuperAdmin();
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $company = Company::find($user->getActiveCompanyId());
+
+        return $company && is_null($company->parent_id);
     }
 
     public static function form(Schema $schema): Schema
