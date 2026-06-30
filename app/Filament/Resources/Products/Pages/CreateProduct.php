@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Batch;
 use App\Models\Category;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -38,5 +39,18 @@ class CreateProduct extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        if ($this->record->qr_mode !== 'general') {
+            return;
+        }
+
+        Batch::create([
+            'product_id' => $this->record->id,
+            'batch_number' => strtoupper(substr($this->record->name, 0, 3)) . '-' . now()->format('YmdHis'),
+            'quantity' => 1,
+        ]);
     }
 }
