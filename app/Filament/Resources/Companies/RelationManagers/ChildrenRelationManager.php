@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Companies\RelationManagers;
 
-use Filament\Actions\CreateAction;
+use App\Filament\Resources\Companies\CompanyResource;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -33,18 +34,13 @@ class ChildrenRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->form([
-                        TextInput::make('name')
-                            ->required(),
-                        Toggle::make('is_active')
-                            ->default(true),
-                    ])
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['parent_id'] = $this->getOwnerRecord()->id;
-
-                        return $data;
-                    })
+                Action::make('createSubCompany')
+                    ->label('Alt Firma Ekle')
+                    ->icon('heroicon-o-plus')
+                    ->color('success')
+                    ->url(fn (): string => CompanyResource::getUrl('create', [
+                        'parent_id' => $this->getOwnerRecord()->id,
+                    ]))
                     ->visible(fn () => $this->getOwnerRecord()->canCreateSubCompany()),
             ])
             ->recordActions([
