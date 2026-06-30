@@ -11,12 +11,14 @@ class CreateCompany extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (blank($data['parent_id'] ?? null) && request()->has('parent_id')) {
-            $data['parent_id'] = request()->query('parent_id');
+        $user = auth()->user();
+
+        if (!$user->isSuperAdmin()) {
+            $data['parent_id'] = $user->getActiveCompanyId();
         }
 
         if (blank($data['company_id'] ?? null)) {
-            $data['company_id'] = auth()->user()->getActiveCompanyId();
+            $data['company_id'] = $user->getActiveCompanyId();
         }
 
         return $data;

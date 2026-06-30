@@ -44,11 +44,7 @@ class CompanyResource extends Resource
             return false;
         }
 
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $user->company_id !== null;
+        return $user->isSuperAdmin();
     }
 
     public static function canViewAny(): bool
@@ -59,11 +55,7 @@ class CompanyResource extends Resource
             return false;
         }
 
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $user->company_id !== null;
+        return $user->isSuperAdmin();
     }
 
     public static function form(Schema $schema): Schema

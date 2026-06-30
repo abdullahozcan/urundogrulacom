@@ -13,7 +13,8 @@ class EditCompany extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => auth()->user()->isSuperAdmin() || $this->record->id !== auth()->user()->getActiveCompanyId()),
         ];
     }
 }

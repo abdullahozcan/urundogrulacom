@@ -57,6 +57,10 @@ class Company extends Model
 
     public function canCreateSubCompany(): bool
     {
+        if (!is_null($this->parent_id)) {
+            return false;
+        }
+
         if ($this->max_sub_companies === null) {
             return true;
         }

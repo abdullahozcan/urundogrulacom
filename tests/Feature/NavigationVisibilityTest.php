@@ -39,7 +39,7 @@ class NavigationVisibilityTest extends TestCase
         $this->assertTrue(SettingResource::shouldRegisterNavigation());
 
         $this->actingAs($companyAdmin);
-        $this->assertTrue(CompanyResource::shouldRegisterNavigation());
+        $this->assertFalse(CompanyResource::shouldRegisterNavigation());
         $this->assertTrue(UserResource::shouldRegisterNavigation());
         $this->assertFalse(PageResource::shouldRegisterNavigation());
         $this->assertFalse(PostResource::shouldRegisterNavigation());
