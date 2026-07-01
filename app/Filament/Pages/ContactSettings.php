@@ -5,19 +5,13 @@ namespace App\Filament\Pages;
 use App\Helpers\SettingHelper;
 use App\Models\Setting;
 use Filament\Actions\Action;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Schema;
-use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use BackedEnum;
 
-class ContactSettings extends Page implements HasForms
+class ContactSettings extends Page
 {
-    use InteractsWithForms;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhone;
 
     protected static ?string $title = 'İletişim Ayarları';
@@ -26,7 +20,13 @@ class ContactSettings extends Page implements HasForms
 
     protected string $view = 'filament.pages.contact-settings';
 
-    public ?array $data = [];
+    public string $contact_address = '';
+
+    public string $contact_email = '';
+
+    public string $contact_phone = '';
+
+    public string $contact_form_to = '';
 
     public static function canAccess(): bool
     {
@@ -40,44 +40,22 @@ class ContactSettings extends Page implements HasForms
 
     public function mount(): void
     {
-        $this->form->fill([
-            'contact_address' => SettingHelper::get('contact_address'),
-            'contact_email' => SettingHelper::get('contact_email'),
-            'contact_phone' => SettingHelper::get('contact_phone'),
-            'contact_form_to' => SettingHelper::get('contact_form_to', 'info@urundogrula.com'),
-        ]);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextInput::make('contact_address')
-                    ->label('Adres')
-                    ->required()
-                    ->columnSpanFull(),
-                TextInput::make('contact_email')
-                    ->label('E-posta (Görünen)')
-                    ->email()
-                    ->required(),
-                TextInput::make('contact_phone')
-                    ->label('Telefon')
-                    ->tel()
-                    ->required(),
-                TextInput::make('contact_form_to')
-                    ->label('Form E-posta Alıcısı')
-                    ->email()
-                    ->helperText('İletişim formundan gelen mesajlar bu adrese gönderilir.')
-                    ->required(),
-            ])
-            ->columns(2);
+        $this->contact_address = (string) SettingHelper::get('contact_address', '');
+        $this->contact_email = (string) SettingHelper::get('contact_email', '');
+        $this->contact_phone = (string) SettingHelper::get('contact_phone', '');
+        $this->contact_form_to = (string) SettingHelper::get('contact_form_to', 'info@urundogrula.com');
     }
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $validated = $this->validate([
+            'contact_address' => 'required|string|max:500',
+            'contact_email' => 'required|email|max:255',
+            'contact_phone' => 'required|string|max:50',
+            'contact_form_to' => 'required|email|max:255',
+        ]);
 
-        foreach ($data as $key => $value) {
+        foreach ($validated as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
                 ['value' => ['tr' => $value, 'en' => $value]]
