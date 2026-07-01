@@ -25,4 +25,9 @@ class SettingHelper
 
         return $default;
     }
+
+    public static function forgetCache(): void
+    {
+        Cache::forget('site_settings');
+    }
 }

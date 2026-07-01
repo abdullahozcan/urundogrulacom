@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Company;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -87,5 +88,20 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        // Varsayılan iletişim ayarları
+        $defaultSettings = [
+            'contact_address' => 'Teknoloji Geliştirme Bölgesi, Ar-Ge Binası No: 1, İstanbul',
+            'contact_email'   => 'info@urundogrula.com',
+            'contact_phone'   => '+90 (850) 123 45 67',
+            'contact_form_to' => 'info@urundogrula.com',
+        ];
+
+        foreach ($defaultSettings as $key => $value) {
+            Setting::firstOrCreate(
+                ['key' => $key],
+                ['value' => ['tr' => $value, 'en' => $value]]
+            );
+        }
     }
 }
