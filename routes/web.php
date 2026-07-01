@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ContactController;
 use App\Livewire\CheckProduct;
 
 Route::get('/locale/{lang}', function ($lang) {
@@ -32,9 +33,8 @@ Route::get('/blog/{slug}', function ($slug) {
     return view('blog.show', compact('post'));
 })->name('blog.show');
 
-Route::get('/iletisim', function () {
-    return view('contact');
-})->name('contact');
+Route::get('/iletisim', [ContactController::class, 'show'])->name('contact');
+Route::post('/iletisim', [ContactController::class, 'send'])->name('contact.send');
 
 Route::get('/p/{slug}', function ($slug) {
     $locale = app()->getLocale();

@@ -9,6 +9,13 @@
             <p class="text-lg text-on-surface-variant max-w-2xl mx-auto">Sorularınız, önerileriniz veya kurumsal çözümlerimiz hakkında bilgi almak için formu doldurabilir veya iletişim bilgilerimizden bize ulaşabilirsiniz.</p>
         </div>
 
+        @if (session('success'))
+            <div class="max-w-2xl mx-auto mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-sm flex items-center gap-3">
+                <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="grid md:grid-cols-2 gap-12 lg:gap-20">
             <!-- Contact Info -->
             <div class="space-y-10">
@@ -61,27 +68,30 @@
             <div class="bg-surface-container-lowest p-8 md:p-10 rounded-3xl shadow-[0_20px_40px_rgba(11,28,48,0.05)] border border-outline-variant/20">
                 <h3 class="text-2xl font-bold text-primary-container mb-6">Mesaj Gönderin</h3>
                 
-                <form action="#" method="POST" class="space-y-6">
+                <form action="{{ route('contact.send') }}" method="POST" class="space-y-6">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-on-surface mb-2">Adınız Soyadınız</label>
-                            <input type="text" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface" placeholder="John Doe" required>
+                            <input type="text" name="name" value="{{ old('name') }}" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface @error('name') ring-2 ring-error/50 @enderror" placeholder="John Doe" required>
+                            @error('name') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-on-surface mb-2">Telefon Numarası</label>
-                            <input type="tel" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface" placeholder="05XX XXX XX XX">
+                            <input type="tel" name="phone" value="{{ old('phone') }}" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface" placeholder="05XX XXX XX XX">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-bold text-on-surface mb-2">E-Posta Adresi</label>
-                        <input type="email" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface" placeholder="ornek@sirket.com" required>
+                        <input type="email" name="email" value="{{ old('email') }}" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface @error('email') ring-2 ring-error/50 @enderror" placeholder="ornek@sirket.com" required>
+                        @error('email') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-bold text-on-surface mb-2">Mesajınız</label>
-                        <textarea rows="5" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface resize-none" placeholder="Size nasıl yardımcı olabiliriz?" required></textarea>
+                        <textarea name="message" rows="5" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/50 text-on-surface resize-none @error('message') ring-2 ring-error/50 @enderror" placeholder="Size nasıl yardımcı olabiliriz?" required>{{ old('message') }}</textarea>
+                        @error('message') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <button type="submit" class="w-full bg-secondary text-white font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-secondary/30 transition-all active:scale-[0.98]">
