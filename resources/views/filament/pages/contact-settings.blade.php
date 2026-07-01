@@ -5,14 +5,19 @@
                 Adres
                 <span class="text-danger-600 dark:text-danger-400">*</span>
             </label>
-            <x-filament::input
-                id="contact_address"
-                type="text"
-                wire:model.blur="contact_address"
+            <x-filament::input.wrapper
+                wire:key="contact_address"
+                :valid="! $errors->has('contact_address')"
                 class="mt-2"
-            />
+            >
+                <x-filament::input
+                    id="contact_address"
+                    type="text"
+                    wire:model.blur="contact_address"
+                />
+            </x-filament::input.wrapper>
             @error('contact_address')
-                <p class="fi-fo-field-label-error-label text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
+                <p class="text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
             @enderror
         </div>
 
@@ -22,14 +27,19 @@
                     E-posta (Görünen)
                     <span class="text-danger-600 dark:text-danger-400">*</span>
                 </label>
-                <x-filament::input
-                    id="contact_email"
-                    type="email"
-                    wire:model.blur="contact_email"
+                <x-filament::input.wrapper
+                    wire:key="contact_email"
+                    :valid="! $errors->has('contact_email')"
                     class="mt-2"
-                />
+                >
+                    <x-filament::input
+                        id="contact_email"
+                        type="email"
+                        wire:model.blur="contact_email"
+                    />
+                </x-filament::input.wrapper>
                 @error('contact_email')
-                    <p class="fi-fo-field-label-error-label text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
+                    <p class="text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -38,14 +48,19 @@
                     Telefon
                     <span class="text-danger-600 dark:text-danger-400">*</span>
                 </label>
-                <x-filament::input
-                    id="contact_phone"
-                    type="tel"
-                    wire:model.blur="contact_phone"
+                <x-filament::input.wrapper
+                    wire:key="contact_phone"
+                    :valid="! $errors->has('contact_phone')"
                     class="mt-2"
-                />
+                >
+                    <x-filament::input
+                        id="contact_phone"
+                        type="tel"
+                        wire:model.blur="contact_phone"
+                    />
+                </x-filament::input.wrapper>
                 @error('contact_phone')
-                    <p class="fi-fo-field-label-error-label text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
+                    <p class="text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
                 @enderror
             </div>
         </div>
@@ -55,15 +70,20 @@
                 Form E-posta Alıcısı
                 <span class="text-danger-600 dark:text-danger-400">*</span>
             </label>
-            <x-filament::input
-                id="contact_form_to"
-                type="email"
-                wire:model.blur="contact_form_to"
+            <x-filament::input.wrapper
+                wire:key="contact_form_to"
+                :valid="! $errors->has('contact_form_to')"
                 class="mt-2"
-            />
+            >
+                <x-filament::input
+                    id="contact_form_to"
+                    type="email"
+                    wire:model.blur="contact_form_to"
+                />
+            </x-filament::input.wrapper>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">İletişim formundan gelen mesajlar bu adrese gönderilir.</p>
             @error('contact_form_to')
-                <p class="fi-fo-field-label-error-label text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
+                <p class="text-sm text-danger-600 dark:text-danger-400 mt-1">{{ $message }}</p>
             @enderror
         </div>
     </form>
