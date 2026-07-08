@@ -101,16 +101,16 @@
                 @if($product->image)
                     <div class="w-full sm:w-48 h-48 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
                         <img src="{{ Storage::url($product->image) }}"
-                             alt="{{ $product->name }}"
+                             alt="{{ $product->getName() }}"
                              class="w-full h-full object-cover">
                     </div>
                 @endif
                 <div class="flex-1 min-w-0">
                     <p class="text-sm text-primary-600 font-medium uppercase tracking-wider">{{ $product->company->name }}</p>
-                    <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $product->name }}</h1>
-                    @if($product->description)
+                    <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $product->getName() }}</h1>
+                    @if($product->getDescription())
                         <div class="mt-3 prose prose-sm max-w-none text-gray-600">
-                            {!! $product->description !!}
+                            {!! $product->getDescription() !!}
                         </div>
                     @endif
                 </div>
@@ -170,6 +170,22 @@
                                     {{ $social['label'] }}
                                 </a>
                             @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if($product->documents->isNotEmpty())
+                <div class="border-t border-gray-200 pt-4">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Belgeler</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($product->documents as $doc)
+                            <a href="{{ Storage::url($doc->file_path) }}"
+                               target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors text-sm font-medium text-gray-700 hover:text-primary-700">
+                                <span class="material-symbols-outlined text-sm">description</span>
+                                {{ $doc->original_name ?? basename($doc->file_path) }}
+                            </a>
                         @endforeach
                     </div>
                 </div>

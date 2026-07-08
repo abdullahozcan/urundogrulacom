@@ -35,6 +35,8 @@ class Product extends Model
     ];
 
     protected $casts = [
+        'name' => 'array',
+        'description' => 'array',
         'qr_mode' => 'string',
         'expiration_date' => 'date',
     ];
@@ -73,6 +75,27 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ProductDocument::class)->orderBy('sort_order');
+    }
+
+    public function getName(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $names = $this->getAttributeValue('name') ?? [];
+
+        return $names[$locale] ?? $names[config('languages.fallback', 'en')] ?? '';
+    }
+
+    public function getDescription(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $descriptions = $this->getAttributeValue('description') ?? [];
+
+        return $descriptions[$locale] ?? $descriptions[config('languages.fallback', 'en')] ?? '';
     }
 
     public function getYoutubeEmbedUrlAttribute(): ?string

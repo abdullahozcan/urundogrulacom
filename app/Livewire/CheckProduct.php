@@ -18,7 +18,11 @@ class CheckProduct extends Component
     {
         $this->uuid = $uuid;
 
-        $this->item = Item::with(['batch.product.company'])->where('uuid', $uuid)->first();
+        $browserLang = substr(request()->header('Accept-Language', 'en'), 0, 2);
+        $supported = array_keys(config('languages.supported', ['en' => 'English']));
+        app()->setLocale(in_array($browserLang, $supported) ? $browserLang : config('languages.fallback', 'en'));
+
+        $this->item = Item::with(['batch.product.company', 'batch.product.documents'])->where('uuid', $uuid)->first();
 
         if (!$this->item) {
             abort(404, 'Product not found or invalid QR code.');

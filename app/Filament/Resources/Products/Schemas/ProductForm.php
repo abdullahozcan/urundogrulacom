@@ -6,8 +6,11 @@ use App\Models\Item;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +21,9 @@ class ProductForm
 {
     public static function configure(Schema $schema): Schema
     {
+        $languages = config('languages.supported', ['en' => 'English']);
+        $fallback = config('languages.fallback', 'en');
+
         return $schema
             ->columns(1)
             ->components([
@@ -37,14 +43,38 @@ class ProductForm
                     ->required(),
                 Section::make('Genel Bilgiler')
                     ->description('Ürün adı ve açıklaması')
-                    ->columns(2)
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Ürün Adı')
-                            ->required(),
-                        RichEditor::make('description')
-                            ->label('Açıklama')
-                            ->columnSpanFull(),
+                        Tabs::make('translations')
+                            ->contained(false)
+                            ->activeTab(function () use ($languages, $fallback) {
+                                $index = 1;
+                                foreach ($languages as $code => $label) {
+                                    if ($code === $fallback) {
+                                        return $index;
+                                    }
+                                    $index++;
+                                }
+                                return 1;
+                            })
+                            ->tabs(function () use ($languages, $fallback) {
+                                $tabs = [];
+                                foreach ($languages as $code => $label) {
+                                    $isRequired = $code === $fallback;
+                                    $requiredMark = $isRequired ? ' *' : '';
+
+                                    $tabs[] = Tab::make($label)
+                                        ->schema([
+                                            TextInput::make("name.{$code}")
+                                                ->label("Ürün Adı{$requiredMark}")
+                                                ->required($isRequired),
+                                            RichEditor::make("description.{$code}")
+                                                ->label("Açıklama{$requiredMark}")
+                                                ->required($isRequired)
+                                                ->columnSpanFull(),
+                                        ]);
+                                }
+                                return $tabs;
+                            }),
                     ]),
                 Section::make('Künye Bilgileri')
                     ->description('Kategori, tarih, görsel ve ürün tipi')
@@ -81,6 +111,31 @@ class ProductForm
                             ->default('physical')
                             ->required()
                             ->live(),
+                    ]),
+                Section::make('Belgeler')
+                    ->description('PDF, PNG, JPEG, GIF dosyalar&imath;')
+                    ->schema([
+                        Repeater::make('documents')
+                            ->relationship('documents')
+                            ->schema([
+                                FileUpload::make('file_path')
+                                    ->label('Dosya')
+                                    ->disk('public')
+                                    ->directory('product_documents')
+                                    ->acceptedFileTypes([
+                                        'application/pdf',
+                                        'image/png',
+                                        'image/jpeg',
+                                        'image/gif',
+                                    ])
+                                    ->required(),
+                                TextInput::make('original_name')
+                                    ->label('Dosya Ad&imath;'),
+                            ])
+                            ->orderColumn('sort_order')
+                            ->addActionLabel('Belge Ekle')
+                            ->collapsible()
+                            ->reorderable(),
                     ]),
                 Section::make('Sosyal Medya')
                     ->description('Ürünün sosyal medya hesaplar&imath; (isteğe bağl&imath;)')
@@ -168,7 +223,8 @@ class ProductForm
                                 : ['application/pdf'])
                             ->maxSize(51200)
                             ->disabled(fn ($get) => $get('type') === 'digital' && $get('digital_content_type') === 'video' && filled($get('youtube_url')))
-                            ->required(fn ($get) => $get('type') === 'digital' && ($get('digital_content_type') !== 'video' || blank($get('youtube_url')))),
+                            ->required(fn ($get) => $get('type') === 'digital' && ($get('digital_content_type') !== 'video' || blank($get('youtube_url'))))
+                            ->columnSpanFull(),
                         TextInput::make('youtube_url')
                             ->label('YouTube Linki')
                             ->placeholder('https://youtube.com/watch?v=...')

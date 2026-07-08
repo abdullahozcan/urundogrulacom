@@ -2,8 +2,11 @@
 
 return [
     'supported' => [
-        'tr' => 'Türkçe',
         'en' => 'English',
+        'tr' => 'Türkçe',
     ],
-    'default' => 'tr',
+
+    'fallback' => 'en',
+
+    'default' => 'en',
 ];
