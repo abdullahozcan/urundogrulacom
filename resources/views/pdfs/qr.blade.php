@@ -13,7 +13,7 @@
             margin: 40px auto;
             max-width: 400px;
         }
-        .qr-container svg {
+        .qr-container img {
             max-width: 100%;
             height: auto;
         }
@@ -43,7 +43,7 @@
     @endisset
 
     <div class="qr-container">
-        {!! $qrSvg !!}
+        <img src="data:image/png;base64,{{ $qrBase64 }}" alt="QR Kod">
     </div>
 
     @isset ($item)

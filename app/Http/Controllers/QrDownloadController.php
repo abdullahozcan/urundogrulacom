@@ -24,12 +24,14 @@ class QrDownloadController extends Controller
 
     public function downloadItemPdf(Item $item): Response
     {
-        $qrSvg = QrCode::size(400)
+        $qrPng = QrCode::format('png')
+            ->size(400)
             ->generate(route('product.check', $item->uuid));
+        $qrBase64 = base64_encode($qrPng);
 
         $pdf = Pdf::loadView('pdfs.qr', [
             'item' => $item,
-            'qrSvg' => $qrSvg,
+            'qrBase64' => $qrBase64,
             'title' => 'QR Kod - ' . $item->uuid,
         ]);
 
@@ -57,13 +59,15 @@ class QrDownloadController extends Controller
         $uuid = $product->general_qr_code ?? $item?->uuid;
         abort_if(!$uuid, 404, 'Bu ürün için QR kodu bulunamadı.');
 
-        $qrSvg = QrCode::size(400)
+        $qrPng = QrCode::format('png')
+            ->size(400)
             ->generate(route('product.check', $uuid));
+        $qrBase64 = base64_encode($qrPng);
 
         $pdf = Pdf::loadView('pdfs.qr', [
             'item' => $item,
             'product' => $product,
-            'qrSvg' => $qrSvg,
+            'qrBase64' => $qrBase64,
             'title' => 'QR Kod - ' . $product->name,
         ]);
 
