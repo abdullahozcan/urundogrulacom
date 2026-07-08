@@ -82,6 +82,16 @@ class Product extends Model
         return $this->hasMany(ProductDocument::class)->orderBy('sort_order');
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->reviews()->where('is_approved', true);
+    }
+
     public function getName(?string $locale = null): string
     {
         $locale = $locale ?? app()->getLocale();

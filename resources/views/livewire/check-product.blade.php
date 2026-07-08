@@ -192,13 +192,119 @@
             @endif
         </div>
     </div>
+
+    {{-- Review Card --}}
+    <div class="glass rounded-2xl overflow-hidden animate-fade-in" x-data="{ hoverRating: 0 }" x-init="$watch('hoverRating', () => {})">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Ürün Değerlendirmesi</h2>
+                @php
+                    $avgRating = $product->reviews->avg('rating');
+                    $reviewsCount = $product->reviews->count();
+                @endphp
+                @if($reviewsCount > 0)
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center">
+                            @for($i = 1; $i <= 5; $i++)
+                                <span class="material-symbols-outlined text-sm {{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
+                            @endfor
+                        </div>
+                        <span class="text-sm text-gray-500">{{ number_format($avgRating, 1) }} ({{ $reviewsCount }})</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            @if($existingReview)
+                {{-- Kullanıcının kendi yorumu --}}
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center gap-1 mb-2">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span class="material-symbols-outlined text-lg {{ $i <= $existingReview->rating ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
+                        @endfor
+                    </div>
+                    @if($existingReview->comment)
+                        <p class="text-sm text-gray-700">{{ $existingReview->comment }}</p>
+                    @endif
+                    <p class="text-xs text-gray-400 mt-2">
+                        @if($existingReview->is_approved)
+                            ✅ Onaylandı
+                        @else
+                            ⏳ Onay bekliyor
+                        @endif
+                    </p>
+                </div>
+            @elseif(!$reviewSaved)
+                {{-- Yorum formu --}}
+                <form wire:submit="submitReview">
+                    <div class="flex items-center gap-1 mb-4">
+                        @for($i = 1; $i <= 5; $i++)
+                            <button type="button"
+                                    x-on:click="$wire.set('rating', {{ $i }})"
+                                    x-on:mouseenter="hoverRating = {{ $i }}"
+                                    x-on:mouseleave="hoverRating = 0"
+                                    class="text-3xl focus:outline-none transition-colors hover:scale-110">
+                                <span class="material-symbols-outlined text-3xl"
+                                      :class="(hoverRating >= {{ $i }} || $wire.rating >= {{ $i }}) ? 'text-yellow-400' : 'text-gray-300'">
+                                    star
+                                </span>
+                            </button>
+                        @endfor
+                    </div>
+
+                    <textarea wire:model="comment"
+                              rows="3"
+                              placeholder="Yorumunuz..."
+                              class="w-full rounded-xl border-gray-200 focus:border-primary-500 focus:ring-primary-500 resize-none text-sm"></textarea>
+                    @error('comment') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+
+                    <x-filament::button type="submit" class="mt-4" size="sm">
+                        Gönder
+                    </x-filament::button>
+                </form>
+            @else
+                <p class="text-sm text-green-600 font-medium">Yorumunuz başarıyla gönderildi. Onaylandığında görünecektir.</p>
+            @endif
+
+            {{-- Diğer onaylı yorumlar --}}
+            @php $approvedReviews = $product->approvedReviews()->latest()->get(); @endphp
+            @if($approvedReviews->isNotEmpty())
+                <div class="border-t border-gray-200 pt-4">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Diğer Yorumlar</p>
+                    <div class="space-y-3">
+                        @foreach($approvedReviews as $review)
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="flex items-center gap-1 mb-1">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <span class="material-symbols-outlined text-sm {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
+                                    @endfor
+                                </div>
+                                @if($review->comment)
+                                    <p class="text-sm text-gray-700">{{ $review->comment }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
 </div>
 
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('productCheck', () => ({
             init() {
+                this.setDeviceCookie();
                 this.getLocation();
+            },
+            setDeviceCookie() {
+                const name = 'device_token';
+                const value = @js($deviceToken);
+                if (!document.cookie.split('; ').find(row => row.startsWith(name + '='))) {
+                    document.cookie = name + '=' + value + '; path=/; max-age=' + (60 * 60 * 24 * 365 * 10);
+                }
             },
             getLocation() {
                 if (!navigator.geolocation) return;
