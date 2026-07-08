@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
         ], package: 'app');
 
         FilamentView::registerRenderHook(
-            'panels::sidebar.start',
+            PanelsRenderHook::SIDEBAR_NAV_START,
             fn (): string => Blade::render('@livewire(\'App\Livewire\CompanySwitcher\')'),
         );
 
