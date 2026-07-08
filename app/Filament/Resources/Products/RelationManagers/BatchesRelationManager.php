@@ -73,7 +73,7 @@ class BatchesRelationManager extends RelationManager
                     ->label('Öğeleri Gör')
                     ->icon('heroicon-o-eye')
                     ->url(fn (Batch $record): string => ItemResource::getUrl('index', [
-                        'tableFilters[batch_id][value]' => $record->id,
+                        'batch_id' => $record->id,
                     ])),
                 EditAction::make()
                     ->modalHeading('Partiyi Düzenle'),
