@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Items\Tables;
 
+use App\Models\Item;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -58,6 +60,14 @@ class ItemsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('qr_png')
+                    ->label('QR İndir (PNG)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (Item $record) => route('admin.items.qr-png', $record)),
+                Action::make('qr_pdf')
+                    ->label('QR İndir (PDF)')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn (Item $record) => route('admin.items.qr-pdf', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

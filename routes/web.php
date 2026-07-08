@@ -50,6 +50,13 @@ Route::get('/p/{slug}', function ($slug) {
     return view('pages.show', compact('page'));
 })->name('page.show');
 
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/items/{item}/qr-png', [\App\Http\Controllers\QrDownloadController::class, 'downloadItemPng'])->name('items.qr-png');
+    Route::get('/items/{item}/qr-pdf', [\App\Http\Controllers\QrDownloadController::class, 'downloadItemPdf'])->name('items.qr-pdf');
+    Route::get('/products/{product}/qr-png', [\App\Http\Controllers\QrDownloadController::class, 'downloadProductPng'])->name('products.qr-png');
+    Route::get('/products/{product}/qr-pdf', [\App\Http\Controllers\QrDownloadController::class, 'downloadProductPdf'])->name('products.qr-pdf');
+});
+
 Route::get('/sitemap.xml', function () {
     $posts = \App\Models\Post::where('is_published', true)->latest()->get();
     $pages = \App\Models\Page::where('is_published', true)->latest()->get();
