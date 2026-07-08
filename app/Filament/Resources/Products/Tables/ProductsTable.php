@@ -7,9 +7,9 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductsTable
 {
@@ -18,25 +18,31 @@ class ProductsTable
         return $table
             ->columns([
                 TextColumn::make('company.name')
+                    ->label(__('filament.product.table.company'))
                     ->searchable(),
                 TextColumn::make('category.name')
-                    ->label('Kategori')
+                    ->label(__('filament.product.table.category'))
                     ->placeholder('-')
                     ->searchable(),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label(__('filament.product.table.name'))
+                    ->getStateUsing(fn (Product $record): string => $record->getName())
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $locale = app()->getLocale();
+                        return $query->where("name->{$locale}", 'like', "%{$search}%");
+                    }),
                 TextColumn::make('qr_mode')
-                    ->label('QR Modu')
+                    ->label(__('filament.product.table.qr_mode'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => $state === 'general' ? 'Genel' : 'Tekil'),
+                    ->formatStateUsing(fn (string $state): string => $state === 'general' ? __('Genel') : __('Tekil')),
                 TextColumn::make('general_qr_code')
-                    ->label('Genel QR')
+                    ->label(__('filament.product.table.qr_code'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('serial_number')
-                    ->label('Seri No')
+                    ->label(__('filament.product.table.serial'))
                     ->searchable(),
                 TextColumn::make('expiration_date')
-                    ->label('Son Kullanma')
+                    ->label(__('filament.product.table.expiry'))
                     ->date('d.m.Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

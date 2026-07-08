@@ -16,7 +16,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -37,6 +37,11 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             'panels::sidebar.start',
             fn (): string => Blade::render('@livewire(\'App\Livewire\CompanySwitcher\')'),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            fn (): string => Blade::render('@livewire(\'App\Livewire\AdminLanguageSwitcher\')'),
         );
     }
 

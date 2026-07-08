@@ -28,7 +28,17 @@ class ProductResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Ürün Yönetimi';
+        return __('filament.product.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('filament.product.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('filament.product.plural_label');
     }
 
     public static function form(Schema $schema): Schema

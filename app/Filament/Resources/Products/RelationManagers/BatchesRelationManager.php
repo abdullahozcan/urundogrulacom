@@ -18,7 +18,10 @@ class BatchesRelationManager extends RelationManager
 {
     protected static string $relationship = 'batches';
 
-    protected static ?string $title = 'Partiler';
+    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    {
+        return __('filament.product.batches_table.title');
+    }
 
     public function isReadOnly(): bool
     {
@@ -31,10 +34,10 @@ class BatchesRelationManager extends RelationManager
             ->columns(1)
             ->components([
                 TextInput::make('batch_number')
-                    ->label('Parti Numarası')
+                    ->label(__('filament.product.batches_table.batch_no'))
                     ->required(),
                 TextInput::make('quantity')
-                    ->label('Adet')
+                    ->label(__('filament.product.batches_table.quantity'))
                     ->required()
                     ->numeric()
                     ->minValue(1)
@@ -47,36 +50,36 @@ class BatchesRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('batch_number')
-                    ->label('Parti No')
+                    ->label(__('filament.product.batches_table.batch_no'))
                     ->searchable(),
                 TextColumn::make('quantity')
-                    ->label('Adet')
+                    ->label(__('filament.product.batches_table.quantity'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('items_count')
-                    ->label('Oluşturulan Adet')
+                    ->label(__('filament.product.batches_table.created_items'))
                     ->counts('items')
                     ->numeric(),
                 TextColumn::make('created_at')
-                    ->label('Oluşturulma')
+                    ->label(__('filament.product.batches_table.created_at'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Parti Ekle')
-                    ->modalHeading('Yeni Parti Oluştur')
+                    ->label(__('filament.actions.add_batch'))
+                    ->modalHeading(__('filament.actions.new_batch'))
                     ->createAnother(false),
             ])
             ->recordActions([
                 Action::make('viewItems')
-                    ->label('Öğeleri Gör')
+                    ->label(__('filament.actions.view_items'))
                     ->icon('heroicon-o-eye')
                     ->url(fn (Batch $record): string => ItemResource::getUrl('index', [
                         'batch_id' => $record->id,
                     ])),
                 EditAction::make()
-                    ->modalHeading('Partiyi Düzenle'),
+                    ->modalHeading(__('filament.actions.edit_batch')),
                 DeleteAction::make(),
             ]);
     }

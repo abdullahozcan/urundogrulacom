@@ -41,8 +41,8 @@ class ProductForm
                     ->visible(fn () => auth()->user()?->isSuperAdmin())
                     ->dehydrated()
                     ->required(),
-                Section::make('Genel Bilgiler')
-                    ->description('Ürün adı ve açıklaması')
+                Section::make(__('filament.product.sections.general'))
+                    ->description(__('filament.product.sections.general_desc'))
                     ->schema([
                         Tabs::make('translations')
                             ->contained(false)
@@ -65,10 +65,10 @@ class ProductForm
                                     $tabs[] = Tab::make($label)
                                         ->schema([
                                             TextInput::make("name.{$code}")
-                                                ->label("Ürün Adı{$requiredMark}")
+                                                ->label(__('filament.fields.name') . $requiredMark)
                                                 ->required($isRequired),
                                             RichEditor::make("description.{$code}")
-                                                ->label("Açıklama{$requiredMark}")
+                                                ->label(__('filament.fields.description') . $requiredMark)
                                                 ->required($isRequired)
                                                 ->columnSpanFull(),
                                         ]);
@@ -76,13 +76,13 @@ class ProductForm
                                 return $tabs;
                             }),
                     ]),
-                Section::make('Künye Bilgileri')
-                    ->description('Kategori, tarih, görsel ve ürün tipi')
+                Section::make(__('filament.product.sections.kunya'))
+                    ->description(__('filament.product.sections.kunya_desc'))
                     ->columns(2)
                     ->schema([
                         Select::make('category_id')
-                            ->label('Kategori')
-                            ->relationship('category', 'name', modifyQueryUsing: function (Builder $query, callable $get) {
+->label(__('filament.fields.category'))
+                    ->relationship('category', 'name', modifyQueryUsing: function (Builder $query, callable $get) {
                                 $user = auth()->user();
                                 $companyId = $get('company_id') ?? $user?->getActiveCompanyId();
 
@@ -112,8 +112,8 @@ class ProductForm
                             ->required()
                             ->live(),
                     ]),
-                Section::make('Belgeler')
-                    ->description('PDF, PNG, JPEG, GIF dosyalar&imath;')
+                Section::make(__('filament.product.sections.documents'))
+                    ->description(__('filament.product.sections.documents_desc'))
                     ->schema([
                         Repeater::make('documents')
                             ->relationship('documents')
@@ -137,8 +137,8 @@ class ProductForm
                             ->collapsible()
                             ->reorderable(),
                     ]),
-                Section::make('Sosyal Medya')
-                    ->description('Ürünün sosyal medya hesaplar&imath; (isteğe bağl&imath;)')
+                Section::make(__('filament.product.sections.social'))
+                    ->description(__('filament.product.sections.social_desc'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('website_url')
@@ -166,8 +166,8 @@ class ProductForm
                             ->url()
                             ->placeholder('https://linkedin.com/in/...'),
                     ]),
-                Section::make('QR Kod Ayarlar&imath;')
-                    ->description('QR kod türü ve genel QR kod değeri')
+                Section::make(__('filament.product.sections.qr'))
+                    ->description(__('filament.product.sections.qr_desc'))
                     ->columns(2)
                     ->schema([
                         Select::make('qr_mode')
@@ -200,8 +200,8 @@ class ProductForm
                             })
                             ->unique(ignoreRecord: true),
                     ]),
-                Section::make('Dijital İçerik')
-                    ->description('Dijital ürünler için dosya ve link ayarlar&imath;')
+                Section::make(__('filament.product.sections.digital'))
+                    ->description(__('filament.product.sections.digital_desc'))
                     ->columns(2)
                     ->visible(fn ($get) => $get('type') === 'digital')
                     ->schema([

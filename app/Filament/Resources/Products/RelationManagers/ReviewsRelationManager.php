@@ -15,7 +15,10 @@ class ReviewsRelationManager extends RelationManager
 {
     protected static string $relationship = 'reviews';
 
-    protected static ?string $title = 'Değerlendirmeler';
+    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    {
+        return __('filament.product.reviews_table.title');
+    }
 
     public function isReadOnly(): bool
     {
@@ -27,33 +30,33 @@ class ReviewsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('rating')
-                    ->label('Puan')
+                    ->label(__('filament.product.reviews_table.rating'))
                     ->formatStateUsing(fn (int $state): string => str_repeat('⭐', $state)),
                 TextColumn::make('comment')
-                    ->label('Yorum')
+                    ->label(__('filament.product.reviews_table.comment'))
                     ->limit(50)
                     ->tooltip(function (ProductReview $record): ?string {
                         return $record->comment;
                     }),
                 IconColumn::make('is_approved')
-                    ->label('Onay')
+                    ->label(__('filament.product.reviews_table.approval'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label('Tarih')
+                    ->label(__('filament.product.reviews_table.date'))
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
                 Action::make('toggleApproval')
-                    ->label(fn (ProductReview $record): string => $record->is_approved ? 'Onayı Kaldır' : 'Onayla')
+                    ->label(fn (ProductReview $record): string => $record->is_approved ? __('filament.actions.unapprove') : __('filament.actions.approve'))
                     ->icon(fn (ProductReview $record): string => $record->is_approved ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn (ProductReview $record): string => $record->is_approved ? 'warning' : 'success')
                     ->action(function (ProductReview $record): void {
                         $record->update(['is_approved' => !$record->is_approved]);
 
                         Notification::make()
-                            ->title($record->is_approved ? 'Yorum onaylandı.' : 'Yorum onayı kaldırıldı.')
+                            ->title($record->is_approved ? __('filament.actions.approved') : __('filament.actions.unapproved'))
                             ->success()
                             ->send();
                     }),
