@@ -38,6 +38,20 @@ class ItemsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('batch_id')
+                    ->label('Parti')
+                    ->options(function () {
+                        $user = auth()->user();
+                        $query = \App\Models\Batch::query();
+
+                        if ($user && !$user->isSuperAdmin()) {
+                            $query->whereHas('product', function (\Illuminate\Database\Eloquent\Builder $q) use ($user) {
+                                $q->whereIn('company_id', $user->getAccessibleCompanyIds());
+                            });
+                        }
+
+                        return $query->pluck('batch_number', 'id');
+                    }),
                 \Filament\Tables\Filters\SelectFilter::make('product_id')
                     ->label('Ürün')
                     ->options(function () {
