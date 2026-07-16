@@ -163,7 +163,7 @@
                             {{ $post->title }}
                         </h3>
                         <div class="text-on-surface-variant text-xs md:text-sm leading-relaxed line-clamp-3">
-                            {!! strip_tags($post->content) !!}
+                            {{ strip_tags($post->content) }}
                         </div>
                     </div>
                 </a>

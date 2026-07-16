@@ -21,7 +21,7 @@ class ContactMail extends Mailable
     {
         return new Envelope(
             to: SettingHelper::get('contact_form_to', 'info@urundogrula.com'),
-            subject: 'İletişim Formu - ' . ($this->data['name'] ?? ''),
+            subject: 'İletişim Formu - ' . str_replace(["\r", "\n"], '', $this->data['name'] ?? ''),
         );
     }
 

@@ -110,7 +110,7 @@
                     <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $product->getName() }}</h1>
                     @if($product->getDescription())
                         <div class="mt-3 prose prose-sm max-w-none text-gray-600">
-                            {!! $product->getDescription() !!}
+                            {{ $product->getDescription() }}
                         </div>
                     @endif
                 </div>

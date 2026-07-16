@@ -30,11 +30,11 @@ class ScansMapWidget extends Widget
             return [
                 'lat' => (float) $scan->lat,
                 'lng' => (float) $scan->lng,
-                'product_name' => $scan->item?->batch?->product?->name ?? 'Bilinmiyor',
+                'product_name' => $scan->item?->batch?->product?->getName() ?? 'Bilinmiyor',
                 'batch_number' => $scan->item?->batch?->batch_number ?? '-',
                 'date' => $scan->scanned_at?->format('d.m.Y H:i') ?? $scan->created_at->format('d.m.Y H:i'),
-                'device' => $scan->device_type ?? 'Bilinmiyor',
-                'browser' => $scan->browser ?? '-',
+                'device' => htmlspecialchars($scan->device_type ?? 'Bilinmiyor', ENT_QUOTES, 'UTF-8'),
+                'browser' => htmlspecialchars($scan->browser ?? '-', ENT_QUOTES, 'UTF-8'),
             ];
         })->toArray();
     }

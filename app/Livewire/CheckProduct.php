@@ -57,6 +57,11 @@ class CheckProduct extends Component
             return;
         }
 
+        $validated = validator(['lat' => $lat, 'lng' => $lng], [
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
+        ])->validate();
+
         $browser = '-';
         $deviceType = 'Desktop';
 
@@ -73,8 +78,8 @@ class CheckProduct extends Component
         Scan::create([
             'item_id' => $this->item->id,
             'ip_address' => request()->ip(),
-            'lat' => $lat,
-            'lng' => $lng,
+            'lat' => $validated['lat'],
+            'lng' => $validated['lng'],
             'browser' => $browser,
             'device_type' => $deviceType,
         ]);

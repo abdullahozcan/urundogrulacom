@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Batches\Schemas;
 
+use App\Models\Product;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Schema;
 
 class BatchForm
@@ -14,21 +14,19 @@ class BatchForm
         return $schema
             ->components([
                 Select::make('product_id')
-                    ->relationship('product', 'name', modifyQueryUsing: function (Builder $query) {
+                    ->options(function () {
                         $user = auth()->user();
+                        $query = Product::query();
 
-                        if (!$user || $user->isSuperAdmin()) {
-                            return;
+                        if ($user && !$user->isSuperAdmin()) {
+                            $companyIds = $user->getAccessibleCompanyIds();
+                            if (empty($companyIds)) {
+                                return [];
+                            }
+                            $query->whereIn('company_id', $companyIds);
                         }
 
-                        $companyIds = $user->getAccessibleCompanyIds();
-
-                        if (empty($companyIds)) {
-                            $query->whereRaw('0 = 1');
-                            return;
-                        }
-
-                        $query->whereIn('company_id', $companyIds);
+                        return $query->get()->mapWithKeys(fn ($product) => [$product->id => $product->getName()]);
                     })
                     ->required(),
                 TextInput::make('batch_number')

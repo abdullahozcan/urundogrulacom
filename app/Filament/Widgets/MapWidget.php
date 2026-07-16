@@ -39,10 +39,10 @@ class MapWidget extends Widget
             return [
                 'lat' => $scan->lat,
                 'lng' => $scan->lng,
-                'product_name' => $scan->item->batch->product->name,
+                'product_name' => $scan->item->batch->product->getName(),
                 'batch_number' => $scan->item->batch->batch_number,
                 'date' => $scan->scanned_at->format('d.m.Y H:i'),
-                'device' => $scan->device_type,
+                'device' => htmlspecialchars($scan->device_type ?? 'Bilinmiyor', ENT_QUOTES, 'UTF-8'),
             ];
         });
     }

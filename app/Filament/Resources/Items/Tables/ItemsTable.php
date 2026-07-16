@@ -62,7 +62,7 @@ class ItemsTable
                             $query->where('company_id', $user->company_id);
                         }
 
-                        return $query->pluck('name', 'id');
+                        return $query->get()->mapWithKeys(fn ($product) => [$product->id => $product->getName()]);
                     })
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
                         if (!empty($data['value'])) {

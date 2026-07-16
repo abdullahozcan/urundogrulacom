@@ -34,7 +34,7 @@ Route::get('/blog/{slug}', function ($slug) {
 })->name('blog.show');
 
 Route::get('/iletisim', [ContactController::class, 'show'])->name('contact');
-Route::post('/iletisim', [ContactController::class, 'send'])->name('contact.send');
+Route::post('/iletisim', [ContactController::class, 'send'])->middleware('throttle:5,10')->name('contact.send');
 
 Route::get('/p/{slug}', function ($slug) {
     $locale = app()->getLocale();

@@ -49,7 +49,7 @@ class CreateProduct extends CreateRecord
 
         Batch::create([
             'product_id' => $this->record->id,
-            'batch_number' => strtoupper(substr($this->record->name, 0, 3)) . '-' . now()->format('YmdHis'),
+            'batch_number' => strtoupper(substr($this->record->getName(), 0, 3)) . '-' . now()->format('YmdHis'),
             'quantity' => 1,
         ]);
     }

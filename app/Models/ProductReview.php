@@ -12,7 +12,6 @@ class ProductReview extends Model
         'rating',
         'comment',
         'cookie_token',
-        'is_approved',
     ];
 
     protected $casts = [

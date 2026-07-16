@@ -40,6 +40,7 @@ class TopScannedItemsWidget extends TableWidget
                     ->copyable(),
                 \Filament\Tables\Columns\TextColumn::make('batch.product.name')
                     ->label('Ürün Adı')
+                    ->getStateUsing(fn (\App\Models\Item $record): string => $record->batch?->product?->getName() ?? '')
                     ->searchable(),
                 \Filament\Tables\Columns\TextColumn::make('scans_count')
                     ->label('Okunma Sayısı')

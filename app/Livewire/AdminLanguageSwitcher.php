@@ -8,6 +8,10 @@ class AdminLanguageSwitcher extends Component
 {
     public function switch(string $locale)
     {
+        if (!auth()->check()) {
+            return;
+        }
+
         if (!array_key_exists($locale, config('languages.supported', []))) {
             return;
         }
@@ -16,7 +20,11 @@ class AdminLanguageSwitcher extends Component
         session()->save();
         app()->setLocale($locale);
 
-        return redirect(request()->header('Referer', '/admin'));
+        $referer = request()->header('Referer', '/admin');
+        $host = request()->getSchemeAndHttpHost();
+        $redirect = str_starts_with($referer, $host) ? $referer : '/admin';
+
+        return redirect($redirect);
     }
 
     public function render()

@@ -39,7 +39,7 @@
     <h1>QR Kod</h1>
 
     @isset ($product)
-        <div class="product-name">{{ $product->name }}</div>
+        <div class="product-name">{{ $product->getName() }}</div>
     @endisset
 
     <div class="qr-container">
