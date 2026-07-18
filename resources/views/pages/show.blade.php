@@ -12,7 +12,7 @@
         </header>
 
         <div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-primary-container prose-a:text-secondary prose-img:rounded-2xl hover:prose-a:text-secondary-fixed-variant">
-            {{ $page->content }}
+            {!! $page->content !!}
         </div>
     </article>
 </x-layouts.public>

@@ -30,7 +30,7 @@
 
         <!-- Content -->
         <div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-primary-container prose-a:text-secondary prose-img:rounded-2xl prose-img:shadow-lg hover:prose-a:text-secondary-fixed-variant">
-            {{ $post->content }}
+            {!! $post->content !!}
         </div>
 
         <!-- Footer / Back to home -->
