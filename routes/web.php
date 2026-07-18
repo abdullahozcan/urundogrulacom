@@ -20,13 +20,13 @@ Route::get('/', function () {
 Route::get('/check/{uuid}', CheckProduct::class)->name('product.check');
 
 Route::get('/blog/{slug}', function ($slug) {
-    $locale = app()->getLocale();
-    $defaultLocale = config('languages.default', 'tr');
+    $locales = array_keys(config('languages.supported', ['en' => 'English']));
     
     $post = \App\Models\Post::where('is_published', true)
-        ->where(function($query) use ($slug, $locale, $defaultLocale) {
-            $query->where("slug->{$locale}", $slug)
-                  ->orWhere("slug->{$defaultLocale}", $slug);
+        ->where(function($query) use ($slug, $locales) {
+            foreach ($locales as $lc) {
+                $query->orWhere("slug->{$lc}", $slug);
+            }
         })
         ->firstOrFail();
 
@@ -37,13 +37,13 @@ Route::get('/iletisim', [ContactController::class, 'show'])->name('contact');
 Route::post('/iletisim', [ContactController::class, 'send'])->middleware('throttle:5,10')->name('contact.send');
 
 Route::get('/p/{slug}', function ($slug) {
-    $locale = app()->getLocale();
-    $defaultLocale = config('languages.default', 'tr');
+    $locales = array_keys(config('languages.supported', ['en' => 'English']));
     
     $page = \App\Models\Page::where('is_published', true)
-        ->where(function($query) use ($slug, $locale, $defaultLocale) {
-            $query->where("slug->{$locale}", $slug)
-                  ->orWhere("slug->{$defaultLocale}", $slug);
+        ->where(function($query) use ($slug, $locales) {
+            foreach ($locales as $lc) {
+                $query->orWhere("slug->{$lc}", $slug);
+            }
         })
         ->firstOrFail();
 
