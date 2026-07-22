@@ -15,8 +15,11 @@
                         return;
                     }
                     try {
+                        const isDark = document.documentElement.classList.contains('dark');
                         this.map = L.map(this.$refs.mapEl, { zoomControl: true, scrollWheelZoom: true }).setView([39.0, 35.0], 5);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        L.tileLayer(isDark
+                            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors',
                             maxZoom: 19
                         }).addTo(this.map);

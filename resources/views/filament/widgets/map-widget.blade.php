@@ -7,17 +7,11 @@
                     Toplam {{ count($this->scans) }} koordinatl&imath; okuma
                 </p>
             </div>
-            <x-filament::button x-on:click="$dispatch('open-modal', { id: 'dashboard-map-modal' })">
-                Haritay&imath; G&ouml;r
-            </x-filament::button>
         </div>
-    </x-filament::section>
-
-    <x-filament::modal id="dashboard-map-modal" heading="Okuma Konumlar&imath;" width="7xl" close-button>
         <div
             x-data="{
                 scans: {{ json_encode($this->scans) }},
-                mapLoaded: true,
+                mapLoaded: false,
                 map: null,
                 initMap() {
                     if (typeof L === 'undefined') {
@@ -27,8 +21,11 @@
                     try {
                         this.mapLoaded = false;
                         const el = this.$refs.mapEl;
+                        const isDark = document.documentElement.classList.contains('dark');
                         this.map = L.map(el, { zoomControl: true, scrollWheelZoom: true }).setView([39.0, 35.0], 5);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        L.tileLayer(isDark
+                            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors',
                             maxZoom: 19
                         }).addTo(this.map);
@@ -61,6 +58,7 @@
                             }
                         }
 
+                        this.map.invalidateSize();
                         this.mapLoaded = true;
                     } catch (e) {
                         console.error('MapWidget error:', e.message);
@@ -68,13 +66,14 @@
                     }
                 }
             }"
-            x-on:x-modal-opened.window="if ($event.detail.id === 'dashboard-map-modal') { $nextTick(() => initMap()); }"
-            class="w-full h-[75vh] min-h-[500px] -m-6 rounded-none overflow-hidden z-0 relative"
+            x-init="initMap()"
+            class="w-full mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-0 relative"
+            style="height: 450px;"
             x-ref="mapEl"
         >
             <div class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10" x-show="!mapLoaded">
                 <x-filament::loading-indicator class="h-8 w-8 text-primary-500" />
             </div>
         </div>
-    </x-filament::modal>
+    </x-filament::section>
 </x-filament-widgets::widget>
