@@ -25,6 +25,20 @@ class QrDownloadController extends Controller
         return $this->userCanAccessProduct($product);
     }
 
+    public function downloadItemSvg(Item $item): Response
+    {
+        abort_unless($this->userCanAccessItem($item), 403);
+
+        $qrCode = QrCode::format('svg')
+            ->size(400)
+            ->generate(route('product.check', $item->uuid));
+
+        return response($qrCode, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Content-Disposition' => 'attachment; filename="qr-' . $item->uuid . '.svg"',
+        ]);
+    }
+
     public function downloadItemPng(Item $item): Response
     {
         abort_unless($this->userCanAccessItem($item), 403);
@@ -43,18 +57,34 @@ class QrDownloadController extends Controller
     {
         abort_unless($this->userCanAccessItem($item), 403);
 
-        $qrPng = QrCode::format('png')
+        $qrSvg = QrCode::format('svg')
             ->size(400)
             ->generate(route('product.check', $item->uuid));
-        $qrBase64 = base64_encode($qrPng);
 
         $pdf = Pdf::loadView('pdfs.qr', [
             'item' => $item,
-            'qrBase64' => $qrBase64,
+            'qrSvg' => $qrSvg,
             'title' => 'QR Kod - ' . $item->uuid,
         ]);
 
         return $pdf->download('qr-' . $item->uuid . '.pdf');
+    }
+
+    public function downloadProductSvg(Product $product): Response
+    {
+        abort_unless($this->userCanAccessProduct($product), 403);
+
+        $uuid = $product->general_qr_code ?? $product->batches()->first()?->items()->first()?->uuid;
+        abort_if(!$uuid, 404, 'Bu ürün için QR kodu bulunamadı.');
+
+        $qrCode = QrCode::format('svg')
+            ->size(400)
+            ->generate(route('product.check', $uuid));
+
+        return response($qrCode, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Content-Disposition' => 'attachment; filename="qr-' . $uuid . '.svg"',
+        ]);
     }
 
     public function downloadProductPng(Product $product): Response
@@ -82,15 +112,14 @@ class QrDownloadController extends Controller
         $uuid = $product->general_qr_code ?? $item?->uuid;
         abort_if(!$uuid, 404, 'Bu ürün için QR kodu bulunamadı.');
 
-        $qrPng = QrCode::format('png')
+        $qrSvg = QrCode::format('svg')
             ->size(400)
             ->generate(route('product.check', $uuid));
-        $qrBase64 = base64_encode($qrPng);
 
         $pdf = Pdf::loadView('pdfs.qr', [
             'item' => $item,
             'product' => $product,
-            'qrBase64' => $qrBase64,
+            'qrSvg' => $qrSvg,
             'title' => 'QR Kod - ' . $product->getName(),
         ]);
 

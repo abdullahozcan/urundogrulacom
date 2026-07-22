@@ -82,6 +82,10 @@ class ItemsTable
                     ->label('QR İndir (PDF)')
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn (Item $record) => route('admin.items.qr-pdf', $record)),
+                Action::make('qr_svg')
+                    ->label('QR İndir (SVG)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (Item $record) => route('admin.items.qr-svg', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

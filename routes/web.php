@@ -55,6 +55,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/items/{item}/qr-pdf', [\App\Http\Controllers\QrDownloadController::class, 'downloadItemPdf'])->name('items.qr-pdf');
     Route::get('/products/{product}/qr-png', [\App\Http\Controllers\QrDownloadController::class, 'downloadProductPng'])->name('products.qr-png');
     Route::get('/products/{product}/qr-pdf', [\App\Http\Controllers\QrDownloadController::class, 'downloadProductPdf'])->name('products.qr-pdf');
+    Route::get('/items/{item}/qr-svg', [\App\Http\Controllers\QrDownloadController::class, 'downloadItemSvg'])->name('items.qr-svg');
+    Route::get('/products/{product}/qr-svg', [\App\Http\Controllers\QrDownloadController::class, 'downloadProductSvg'])->name('products.qr-svg');
 });
 
 Route::get('/sitemap.xml', function () {

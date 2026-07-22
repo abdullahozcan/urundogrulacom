@@ -70,6 +70,11 @@ class ProductsTable
                     ->icon('heroicon-o-document-arrow-down')
                     ->visible(fn (Product $record) => $record->qr_mode === 'general' && $record->general_qr_code)
                     ->url(fn (Product $record) => route('admin.products.qr-pdf', $record)),
+                Action::make('qr_svg')
+                    ->label('QR İndir (SVG)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->visible(fn (Product $record) => $record->qr_mode === 'general' && $record->general_qr_code)
+                    ->url(fn (Product $record) => route('admin.products.qr-svg', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
