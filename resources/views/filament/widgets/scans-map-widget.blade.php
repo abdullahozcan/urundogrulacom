@@ -61,7 +61,8 @@
                 }
             }" 
             x-init="initMap()" 
-            class="w-full h-80 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-0 relative"
+            class="w-full mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-0 relative"
+            style="height: 450px;"
             x-ref="mapEl"
         >
             <div class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10" x-show="!mapLoaded">

@@ -39,7 +39,7 @@ class MapWidget extends Widget
             return [
                 'lat' => $scan->lat,
                 'lng' => $scan->lng,
-                'product_name' => $scan->item->batch->product->getName(),
+                'product_name' => $scan->item?->batch?->product?->getName() ?? 'Bilinmiyor',
                 'batch_number' => $scan->item->batch->batch_number,
                 'date' => $scan->scanned_at->format('d.m.Y H:i'),
                 'device' => htmlspecialchars($scan->device_type ?? 'Bilinmiyor', ENT_QUOTES, 'UTF-8'),
