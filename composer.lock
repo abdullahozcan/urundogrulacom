@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bf49149501006770d4bf16df964a5e1",
+    "content-hash": "fc6176659528d876c272824a0c7f002c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5196,6 +5196,70 @@
                 "source": "https://github.com/antonioribeiro/google2fa-qrcode/tree/v3.0.0"
             },
             "time": "2021-08-15T12:53:48+00:00"
+        },
+        {
+            "name": "prunacatalin/filament-locale-switcher",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PrunaCatalin/filament-locale-switcher.git",
+                "reference": "9ac57eb3deb2e1941d829f40fabdd0d71a6392c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PrunaCatalin/filament-locale-switcher/zipball/9ac57eb3deb2e1941d829f40fabdd0d71a6392c1",
+                "reference": "9ac57eb3deb2e1941d829f40fabdd0d71a6392c1",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0|^4.0|^5.0",
+                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "pestphp/pest": "^3.0|^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0|^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Prunacatalin\\FilamentLocaleSwitcher\\LocaleSwitcherServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prunacatalin\\FilamentLocaleSwitcher\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Catalin Pruna",
+                    "email": "office@webdirect.dev",
+                    "homepage": "https://webdirect.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Drop-in topbar locale switcher for Filament v4/v5 panels. Session + per-user persistence, explicit locale list, render-hook dropdown.",
+            "keywords": [
+                "filament",
+                "filament-plugin",
+                "i18n",
+                "locale",
+                "translation"
+            ],
+            "support": {
+                "issues": "https://github.com/PrunaCatalin/filament-locale-switcher/issues",
+                "source": "https://github.com/PrunaCatalin/filament-locale-switcher/tree/v1.0.0"
+            },
+            "time": "2026-05-24T21:37:05+00:00"
         },
         {
             "name": "psr/clock",

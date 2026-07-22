@@ -24,6 +24,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Support\Facades\Blade;
+use Prunacatalin\FilamentLocaleSwitcher\Http\Middleware\ApplyLocale;
+use Prunacatalin\FilamentLocaleSwitcher\LocaleSwitchPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,11 +39,6 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::SIDEBAR_NAV_START,
             fn (): string => Blade::render('@livewire(\'App\Livewire\CompanySwitcher\')'),
-        );
-
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::USER_MENU_BEFORE,
-            fn (): string => Blade::render('@livewire(\'App\Livewire\AdminLanguageSwitcher\')'),
         );
     }
 
@@ -70,6 +67,7 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                ApplyLocale::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
@@ -79,6 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                LocaleSwitchPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
