@@ -88,6 +88,12 @@
                         "primary-fixed": "#d6e3ff",
                         "on-error": "#ffffff"
                     },
+                    "trust-blue": "#002FC9",
+                    "success-green": "#00CC66",
+                    "deep-navy": "#0E1D34",
+                    "surface-ice": "#F8F9FF",
+                    "status-error": "#D32F2F",
+                    "status-warning": "#ED6C02",
                     "borderRadius": {
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
@@ -116,6 +122,29 @@
             background: rgba(248, 249, 255, 0.8);
             backdrop-filter: blur(20px);
         }
+
+        .bg-grid-subtle {
+            background-image: linear-gradient(to right, rgba(14, 29, 52, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(14, 29, 52, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .inner-glow-success {
+            box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.15);
+        }
+
+        @keyframes badgePulse {
+            0% { transform: scale(1); box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.1); }
+            50% { transform: scale(1.03); box-shadow: inset 0 0 20px rgba(0, 204, 102, 0.25); }
+            100% { transform: scale(1); box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.1); }
+        }
+
+        @keyframes scanSweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        [x-cloak] { display: none !important; }
     </style>
     @livewireStyles
     {!! \App\Helpers\SettingHelper::get('custom_head_scripts') !!}

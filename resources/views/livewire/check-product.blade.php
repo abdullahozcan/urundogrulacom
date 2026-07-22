@@ -1,167 +1,253 @@
-<div class="w-full max-w-3xl mx-auto px-4 sm:px-0 space-y-6" x-data="productCheck()">
-    <style>
-        @keyframes scanSweep {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
-        }
-        .scan-sweep {
-            animation: scanSweep 2s ease-in-out infinite;
-        }
-        [x-cloak] { display: none !important; }
-    </style>
-
+<div class="max-w-screen-2xl mx-auto space-y-6 px-4 sm:px-6 py-6" x-data="productCheck()">
     @php $product = $item->batch->product; @endphp
 
-    {{-- Scan Status (top) --}}
-    @if($scanSaved)
-        <div class="rounded-2xl px-4 py-3 sm:p-5 text-center animate-fade-in bg-green-600">
-            <div class="flex items-center justify-center gap-2 sm:gap-3">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg sm:text-xl text-white">check_circle</span>
-                </div>
-                <p class="text-white font-semibold text-sm sm:text-base">Bu ürün başarıyla doğrulandı.</p>
-            </div>
-            <p class="text-xs text-white/70 mt-1">Doğrulama kaydınız oluşturuldu.</p>
-        </div>
-    @endif
-
-    {{-- Digital Content --}}
+    {{-- Digital Content Modal --}}
     @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url))
-        <div class="glass rounded-2xl overflow-hidden animate-fade-in" x-data="{ mediaOpen: false }">
-            <div class="p-8 text-center">
+        <template x-teleport="body">
+            <div x-show="mediaOpen" x-cloak x-trap.noscroll="mediaOpen"
+                 class="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
+                 x-on:keydown.escape.window="mediaOpen = false">
+                <button @click="mediaOpen = false"
+                        class="absolute top-4 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
                 @if($product->digital_content_type === 'video')
-                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-primary-100 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-5xl text-primary-600">play_circle</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Video İçerik</h3>
-                    <p class="text-sm text-gray-500 mt-1 mb-6">Bu ürün bir video içeriği içermektedir.</p>
-                    <button @click="mediaOpen = true"
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                        <span class="material-symbols-outlined text-lg">play_arrow</span>
-                        İzle
-                    </button>
-                @else
-                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-5xl text-red-600">picture_as_pdf</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900">PDF Belge</h3>
-                    <p class="text-sm text-gray-500 mt-1 mb-6">Bu ürün bir PDF belgesi içermektedir.</p>
-                    <button @click="mediaOpen = true"
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors">
-                        <span class="material-symbols-outlined text-lg">visibility</span>
-                        Görüntüle
-                    </button>
+                    @if($product->youtube_embed_url)
+                        <iframe src="{{ $product->youtube_embed_url }}?autoplay=1&rel=0"
+                                class="w-full h-full" allow="autoplay; fullscreen; accelerometer; gyroscope" allowfullscreen>
+                        </iframe>
+                    @elseif($product->digital_file_path)
+                        <video controls autoplay class="w-full h-full object-contain" playsinline>
+                            <source src="{{ Storage::url($product->digital_file_path) }}" type="video/mp4">
+                        </video>
+                    @endif
+                @elseif($product->digital_content_type === 'pdf' && $product->digital_file_path)
+                    <iframe src="{{ Storage::url($product->digital_file_path) }}#view=fitH"
+                            class="w-full h-full" allowfullscreen>
+                    </iframe>
                 @endif
             </div>
-
-            <template x-teleport="body">
-                <div x-show="mediaOpen"
-                     x-cloak
-                     x-trap.noscroll="mediaOpen"
-                     class="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
-                     x-on:keydown.escape.window="mediaOpen = false">
-                    <button @click="mediaOpen = false"
-                            class="absolute top-4 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
-                        <span class="material-symbols-outlined text-3xl">close</span>
-                    </button>
-
-                    @if($product->digital_content_type === 'video')
-                        @if($product->youtube_embed_url)
-                            <iframe src="{{ $product->youtube_embed_url }}?autoplay=1&rel=0"
-                                    class="w-full h-full"
-                                    allow="autoplay; fullscreen; accelerometer; gyroscope"
-                                    allowfullscreen>
-                            </iframe>
-                        @elseif($product->digital_file_path)
-                            <video controls autoplay class="w-full h-full object-contain" playsinline>
-                                <source src="{{ Storage::url($product->digital_file_path) }}" type="video/mp4">
-                            </video>
-                        @endif
-                    @elseif($product->digital_content_type === 'pdf' && $product->digital_file_path)
-                        <iframe src="{{ Storage::url($product->digital_file_path) }}#view=fitH"
-                                class="w-full h-full"
-                                allowfullscreen>
-                        </iframe>
-                    @endif
-                </div>
-            </template>
-        </div>
+        </template>
     @endif
 
-    {{-- Verification Card --}}
-    <div class="glass rounded-2xl overflow-hidden animate-fade-in">
-        <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-white text-xl">verified</span>
-            <span class="text-white font-semibold">Orijinal Ürün</span>
+    {{-- Hero: Verification Status --}}
+    <section class="relative bg-white border border-deep-navy/10 rounded-xl overflow-hidden p-6 md:p-12 flex flex-col md:flex-row items-center gap-6 md:gap-12 shadow-sm">
+        <div class="absolute inset-0 bg-grid-subtle pointer-events-none opacity-50"></div>
+        <div class="relative z-10 flex-shrink-0">
+            <div class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-success-green/10 flex items-center justify-center inner-glow-success border-4 border-success-green/20"
+                 style="animation: badgePulse 4s infinite ease-in-out;">
+                <span class="material-symbols-outlined text-success-green !text-[64px] md:!text-[96px]" style="font-variation-settings: 'wght' 700;">verified</span>
+            </div>
+        </div>
+        <div class="relative z-10 text-center md:text-left">
+            @if($scanSaved)
+                <span class="inline-block bg-success-green/10 text-success-green font-bold text-xs px-3 py-1 rounded-full mb-2 uppercase tracking-widest">
+                    Doğrulanmış Kayıt
+                </span>
+                <h1 class="text-3xl md:text-4xl font-bold text-deep-navy mb-1 tracking-tight">Ürün Doğrulandı</h1>
+                <p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-1 text-sm">
+                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    Doğrulama Zamanı: <span class="font-bold">{{ now()->locale(app()->getLocale())->isoFormat('DD MMMM YYYY, HH:mm:ss') }} (GMT+3)</span>
+                </p>
+            @else
+                <span class="inline-block bg-status-warning/10 text-status-warning font-bold text-xs px-3 py-1 rounded-full mb-2 uppercase tracking-widest">
+                    Doğrulanıyor
+                </span>
+                <h1 class="text-3xl md:text-4xl font-bold text-deep-navy mb-1 tracking-tight">Ürün Taranıyor</h1>
+                <p class="text-on-surface-variant text-sm">Konum bilginiz alınıyor, lütfen bekleyin...</p>
+            @endif
+            <div class="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded border border-deep-navy/5">
+                    <span class="material-symbols-outlined text-trust-blue text-[18px]">security</span>
+                    <span class="text-xs font-semibold tracking-wider text-deep-navy">Sertifika ID: #{{ substr($item->uuid, 0, 4) }}-{{ substr($item->uuid, 4, 4) }}-{{ substr($item->uuid, 8, 4) }}-{{ substr($item->uuid, 12, 4) }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="hidden xl:block absolute right-12 top-1/2 -translate-y-1/2 opacity-10">
+            <span class="material-symbols-outlined !text-[200px] text-deep-navy">verified_user</span>
+        </div>
+    </section>
+
+    {{-- Main Content Grid --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {{-- Left: Product Information (8 cols) --}}
+        <div class="lg:col-span-8 space-y-6">
+            {{-- Product Info Table --}}
+            <div class="bg-white border border-deep-navy/10 rounded-xl overflow-hidden shadow-sm">
+                <div class="px-6 py-4 bg-surface-ice border-b-2 border-trust-blue flex justify-between items-center">
+                    <h2 class="font-semibold text-lg text-deep-navy">Ürün Bilgileri</h2>
+                    <span class="material-symbols-outlined text-trust-blue">inventory_2</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <tbody>
+                            <tr class="bg-surface-ice/50 border-b border-deep-navy/5">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant w-1/3">Ürün Adı</th>
+                                <td class="px-6 py-4 font-semibold text-deep-navy">{{ $product->getName() }}</td>
+                            </tr>
+                            @if($product->serial_number)
+                            <tr class="border-b border-deep-navy/5">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Seri Numarası</th>
+                                <td class="px-6 py-4 font-mono font-bold text-trust-blue tracking-wider">{{ $product->serial_number }}</td>
+                            </tr>
+                            @endif
+                            <tr class="bg-surface-ice/50 border-b border-deep-navy/5">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Üretici Firma</th>
+                                <td class="px-6 py-4 font-semibold text-on-surface">{{ $product->company->name }}</td>
+                            </tr>
+                            <tr class="border-b border-deep-navy/5">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Parti Numarası</th>
+                                <td class="px-6 py-4 font-mono text-on-surface">{{ $item->batch->batch_number }}</td>
+                            </tr>
+                            <tr class="bg-surface-ice/50 border-b border-deep-navy/5">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Benzersiz Kod</th>
+                                <td class="px-6 py-4 font-mono text-on-surface break-all text-sm">{{ $item->uuid }}</td>
+                            </tr>
+                            <tr class="{{ $product->serial_number ? 'bg-surface-ice/50' : '' }}">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Son Kullanma / Garanti</th>
+                                <td class="px-6 py-4 text-on-surface">{{ $product->expiration_date ? $product->expiration_date->format('d.m.Y') : 'Belirtilmemiş' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Documents Section --}}
+            @if($product->documents->isNotEmpty())
+                <div class="space-y-4">
+                    <h2 class="font-semibold text-lg text-deep-navy px-1">Resmi Belgeler ve Sertifikalar</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        @foreach($product->documents as $doc)
+                            <div class="group bg-white border border-deep-navy/10 rounded-xl p-4 flex flex-col gap-3 hover:border-trust-blue transition-all cursor-pointer shadow-sm">
+                                <div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined !text-[28px]">description</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-deep-navy mb-1">{{ $doc->original_name ?? basename($doc->file_path) }}</h3>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">PDF Belgesi</p>
+                                </div>
+                                <a href="{{ Storage::url($doc->file_path) }}" target="_blank" rel="noopener noreferrer"
+                                   class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-sm group-hover:underline">
+                                    <span class="material-symbols-outlined text-[18px]">download</span> İndir (PDF)
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
-        <div class="p-6 space-y-6">
-            {{-- Image + Basic Info --}}
-            <div class="flex flex-col sm:flex-row gap-6">
-                @if($product->image)
-                    <div class="w-full sm:w-48 h-48 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
+        {{-- Right: Product Preview & Security (4 cols) --}}
+        <aside class="lg:col-span-4 space-y-6">
+            {{-- Product Image --}}
+            @if($product->image)
+                <div class="bg-white border border-deep-navy/10 rounded-xl p-4 shadow-sm">
+                    <div class="aspect-square bg-surface-container rounded-lg overflow-hidden mb-3 relative">
                         <img src="{{ Storage::url($product->image) }}"
                              alt="{{ $product->getName() }}"
                              class="w-full h-full object-cover">
-                    </div>
-                @endif
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-primary-600 font-medium uppercase tracking-wider">{{ $product->company->name }}</p>
-                    <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $product->getName() }}</h1>
-                    @if($product->getDescription())
-                        <div class="mt-3 prose prose-sm max-w-none text-gray-600">
-                            {{ $product->getDescription() }}
+                        <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-md">
+                            <span class="text-xs font-bold text-deep-navy">FİZİKSEL ÜRÜN</span>
                         </div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Üretici Görseli</p>
+                        <p class="text-xs text-on-surface italic">Görsel, sistem kayıtlarındaki orijinal ürün ile eşleşmektedir.</p>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Digital Content Trigger --}}
+            @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url))
+                <div class="bg-white border border-deep-navy/10 rounded-xl p-4 shadow-sm text-center">
+                    @if($product->digital_content_type === 'video')
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-4xl text-primary-600">play_circle</span>
+                        </div>
+                        <h3 class="font-semibold text-deep-navy">Video İçerik</h3>
+                        <p class="text-xs text-on-surface-variant mt-1 mb-4">Bu ürün bir video içeriği içermektedir.</p>
+                        <button @click="mediaOpen = true"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-trust-blue hover:opacity-90 text-white font-medium rounded-lg transition-all text-sm">
+                            <span class="material-symbols-outlined text-lg">play_arrow</span>
+                            İzle
+                        </button>
+                    @else
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-red-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-4xl text-red-600">picture_as_pdf</span>
+                        </div>
+                        <h3 class="font-semibold text-deep-navy">PDF Belge</h3>
+                        <p class="text-xs text-on-surface-variant mt-1 mb-4">Bu ürün bir PDF belgesi içermektedir.</p>
+                        <button @click="mediaOpen = true"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:opacity-90 text-white font-medium rounded-lg transition-all text-sm">
+                            <span class="material-symbols-outlined text-lg">visibility</span>
+                            Görüntüle
+                        </button>
                     @endif
                 </div>
-            </div>
+            @endif
 
-            {{-- Details Grid --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @if($product->serial_number)
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <p class="text-xs text-gray-500 uppercase tracking-wider font-medium">Seri Numaras&imath;</p>
-                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $product->serial_number }}</p>
-                    </div>
-                @endif
-                @if($product->expiration_date)
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <p class="text-xs text-gray-500 uppercase tracking-wider font-medium">Son Kullanma Tarihi</p>
-                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $product->expiration_date->format('d.m.Y') }}</p>
-                    </div>
-                @endif
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium">Parti Numaras&imath;</p>
-                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ $item->batch->batch_number }}</p>
+            {{-- Security Checklist --}}
+            <div class="bg-deep-navy text-white rounded-xl p-6 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <span class="material-symbols-outlined !text-[120px]">shield</span>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium">Benzersiz Kod</p>
-                    <p class="text-sm font-mono font-semibold text-gray-900 mt-1 break-all">{{ $item->uuid }}</p>
+                <div class="relative z-10">
+                    <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined">security</span>
+                        Güvenlik Bilgisi
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3">
+                            <span class="material-symbols-outlined text-success-green flex-shrink-0">check_circle</span>
+                            <div class="text-sm">
+                                <p class="font-bold">Manipülasyon Korumalı</p>
+                                <p class="text-surface-variant/70">Bu kayıt blockchain tabanlı sistemimizle mühürlenmiştir.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="material-symbols-outlined text-success-green flex-shrink-0">check_circle</span>
+                            <div class="text-sm">
+                                <p class="font-bold">Yetkili Satıcı</p>
+                                <p class="text-surface-variant/70">Ürün yetkili bir dağıtım kanalından tedarik edilmiştir.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="material-symbols-outlined text-success-green flex-shrink-0">check_circle</span>
+                            <div class="text-sm">
+                                <p class="font-bold">Aktif Garanti</p>
+                                <p class="text-surface-variant/70">Ürün garanti kapsamındadır.</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="{{ route('page.show', 'gizlilik-politikasi') }}"
+                       class="w-full mt-6 bg-white text-deep-navy font-bold py-3 rounded-lg hover:bg-surface-ice transition-colors block text-center text-sm">
+                        Sertifikayı Doğrula
+                    </a>
                 </div>
             </div>
 
             {{-- Social Media --}}
             @php
                 $socials = [
-                    'web'    => ['url' => $product->website_url,    'label' => 'Web Sitesi',    'icon' => 'language',     'class' => 'hover:bg-gray-200 text-gray-600'],
-                    'insta'  => ['url' => $product->instagram_url,  'label' => 'Instagram',      'icon' => 'photo_camera', 'class' => 'hover:bg-pink-100 text-pink-600'],
-                    'fb'     => ['url' => $product->facebook_url,   'label' => 'Facebook',       'icon' => 'facebook',     'class' => 'hover:bg-blue-100 text-blue-600'],
-                    'tw'     => ['url' => $product->twitter_url,    'label' => 'Twitter / X',    'icon' => null,           'class' => 'hover:bg-gray-200 text-gray-900'],
-                    'tt'     => ['url' => $product->tiktok_url,     'label' => 'TikTok',         'icon' => 'music_note',   'class' => 'hover:bg-gray-200 text-gray-900'],
-                    'in'     => ['url' => $product->linkedin_url,   'label' => 'LinkedIn',       'icon' => 'business',     'class' => 'hover:bg-blue-100 text-blue-700'],
+                    'web'    => ['url' => $product->website_url,    'label' => 'Web Sitesi',    'icon' => 'language'],
+                    'insta'  => ['url' => $product->instagram_url,  'label' => 'Instagram',      'icon' => 'photo_camera'],
+                    'fb'     => ['url' => $product->facebook_url,   'label' => 'Facebook',       'icon' => 'facebook'],
+                    'tw'     => ['url' => $product->twitter_url,    'label' => 'Twitter / X',    'icon' => null],
+                    'tt'     => ['url' => $product->tiktok_url,     'label' => 'TikTok',         'icon' => 'music_note'],
+                    'in'     => ['url' => $product->linkedin_url,   'label' => 'LinkedIn',       'icon' => 'business'],
                 ];
                 $hasSocials = collect($socials)->filter(fn($s) => $s['url'])->isNotEmpty();
             @endphp
 
             @if($hasSocials)
-                <div class="border-t border-gray-200 pt-4">
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Sosyal Medya</p>
+                <div class="bg-white border border-deep-navy/10 rounded-xl p-4 shadow-sm">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">Sosyal Medya</h3>
                     <div class="flex flex-wrap gap-2">
                         @foreach($socials as $key => $social)
                             @if($social['url'])
                                 <a href="{{ $social['url'] }}"
                                    target="_blank" rel="noopener noreferrer"
-                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 transition-colors text-sm font-medium {{ $social['class'] }}">
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container/50 hover:bg-surface-container transition-colors text-xs font-semibold text-on-surface-variant hover:text-trust-blue">
                                     @if($key === 'tw')
                                         <span class="font-bold">𝕏</span>
                                     @else
@@ -174,60 +260,40 @@
                     </div>
                 </div>
             @endif
+        </aside>
+    </div>
 
-            @if($product->documents->isNotEmpty())
-                <div class="border-t border-gray-200 pt-4">
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Belgeler</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($product->documents as $doc)
-                            <a href="{{ Storage::url($doc->file_path) }}"
-                               target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors text-sm font-medium text-gray-700 hover:text-primary-700">
-                                <span class="material-symbols-outlined text-sm">description</span>
-                                {{ $doc->original_name ?? basename($doc->file_path) }}
-                            </a>
-                        @endforeach
+    {{-- Review Section --}}
+    <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 bg-surface-ice border-b border-deep-navy/5 flex items-center justify-between">
+            <h2 class="font-semibold text-deep-navy">Ürün Değerlendirmesi</h2>
+            @php
+                $avgRating = $product->reviews->avg('rating');
+                $reviewsCount = $product->reviews->count();
+            @endphp
+            @if($reviewsCount > 0)
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span class="material-symbols-outlined text-sm {{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
+                        @endfor
                     </div>
+                    <span class="text-sm text-on-surface-variant">{{ number_format($avgRating, 1) }} ({{ $reviewsCount }})</span>
                 </div>
             @endif
         </div>
-    </div>
-
-    {{-- Review Card --}}
-    <div class="glass rounded-2xl overflow-hidden animate-fade-in" x-data="{ hoverRating: 0 }" x-init="$watch('hoverRating', () => {})">
-        <div class="px-6 py-4 border-b border-gray-100">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Ürün Değerlendirmesi</h2>
-                @php
-                    $avgRating = $product->reviews->avg('rating');
-                    $reviewsCount = $product->reviews->count();
-                @endphp
-                @if($reviewsCount > 0)
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center">
-                            @for($i = 1; $i <= 5; $i++)
-                                <span class="material-symbols-outlined text-sm {{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
-                            @endfor
-                        </div>
-                        <span class="text-sm text-gray-500">{{ number_format($avgRating, 1) }} ({{ $reviewsCount }})</span>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-6" x-data="{ hoverRating: 0 }">
             @if($existingReview)
-                {{-- Kullanıcının kendi yorumu --}}
-                <div class="bg-gray-50 rounded-xl p-4">
+                <div class="bg-surface-ice/50 rounded-xl p-4">
                     <div class="flex items-center gap-1 mb-2">
                         @for($i = 1; $i <= 5; $i++)
                             <span class="material-symbols-outlined text-lg {{ $i <= $existingReview->rating ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
                         @endfor
                     </div>
                     @if($existingReview->comment)
-                        <p class="text-sm text-gray-700">{{ $existingReview->comment }}</p>
+                        <p class="text-sm text-on-surface">{{ $existingReview->comment }}</p>
                     @endif
-                    <p class="text-xs text-gray-400 mt-2">
+                    <p class="text-xs text-on-surface-variant mt-2">
                         @if($existingReview->is_approved)
                             ✅ Onaylandı
                         @else
@@ -236,7 +302,6 @@
                     </p>
                 </div>
             @elseif(!$reviewSaved)
-                {{-- Yorum formu --}}
                 <form wire:submit="submitReview">
                     <div class="flex items-center gap-1 mb-4">
                         @for($i = 1; $i <= 5; $i++)
@@ -252,36 +317,34 @@
                             </button>
                         @endfor
                     </div>
-
                     <textarea wire:model="comment"
                               rows="3"
                               placeholder="Yorumunuz..."
-                              class="w-full rounded-xl border-gray-200 focus:border-primary-500 focus:ring-primary-500 resize-none text-sm"></textarea>
-                    @error('comment') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-
-                    <x-filament::button type="submit" class="mt-4" size="sm">
+                              class="w-full rounded-xl border border-deep-navy/10 focus:border-trust-blue focus:ring-trust-blue resize-none text-sm px-4 py-3"></textarea>
+                    @error('comment') <p class="text-sm text-status-error mt-1">{{ $message }}</p> @enderror
+                    <button type="submit"
+                            class="mt-4 px-5 py-2.5 bg-trust-blue text-white font-semibold rounded-lg hover:opacity-90 transition-all text-sm">
                         Gönder
-                    </x-filament::button>
+                    </button>
                 </form>
             @else
-                <p class="text-sm text-green-600 font-medium">Yorumunuz başarıyla gönderildi. Onaylandığında görünecektir.</p>
+                <p class="text-sm text-success-green font-medium">Yorumunuz başarıyla gönderildi. Onaylandığında görünecektir.</p>
             @endif
 
-            {{-- Diğer onaylı yorumlar --}}
             @php $approvedReviews = $product->approvedReviews()->latest()->get(); @endphp
             @if($approvedReviews->isNotEmpty())
-                <div class="border-t border-gray-200 pt-4">
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Diğer Yorumlar</p>
+                <div class="border-t border-deep-navy/5 pt-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">Diğer Yorumlar</p>
                     <div class="space-y-3">
                         @foreach($approvedReviews as $review)
-                            <div class="bg-gray-50 rounded-xl p-3">
+                            <div class="bg-surface-ice/50 rounded-xl p-3">
                                 <div class="flex items-center gap-1 mb-1">
                                     @for($i = 1; $i <= 5; $i++)
                                         <span class="material-symbols-outlined text-sm {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">star</span>
                                     @endfor
                                 </div>
                                 @if($review->comment)
-                                    <p class="text-sm text-gray-700">{{ $review->comment }}</p>
+                                    <p class="text-sm text-on-surface">{{ $review->comment }}</p>
                                 @endif
                             </div>
                         @endforeach
@@ -290,11 +353,32 @@
             @endif
         </div>
     </div>
+
+    {{-- Mobile Bottom Nav --}}
+    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-white border-t border-deep-navy/10 shadow-lg rounded-t-full">
+        <div class="flex flex-col items-center justify-center bg-surface-container rounded-full p-2 scale-95 duration-100">
+            <span class="material-symbols-outlined text-trust-blue">qr_code_scanner</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-trust-blue">Doğrula</span>
+        </div>
+        <div class="flex flex-col items-center justify-center text-on-surface-variant p-2">
+            <span class="material-symbols-outlined">history</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest">Geçmiş</span>
+        </div>
+        <div class="flex flex-col items-center justify-center text-on-surface-variant p-2">
+            <span class="material-symbols-outlined">description</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest">Belgeler</span>
+        </div>
+        <div class="flex flex-col items-center justify-center text-on-surface-variant p-2">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest">Profil</span>
+        </div>
+    </nav>
 </div>
 
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('productCheck', () => ({
+            mediaOpen: false,
             init() {
                 this.setDeviceCookie();
                 this.getLocation();

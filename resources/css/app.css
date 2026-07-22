@@ -9,3 +9,32 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.fi-sc-section[data-card-color] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+}
+
+.fi-sc-section[data-card-color='blue'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #eff6ff;
+    --tw-ring-color: #bfdbfe;
+}
+.fi-sc-section[data-card-color='emerald'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #ecfdf5;
+    --tw-ring-color: #a7f3d0;
+}
+.fi-sc-section[data-card-color='amber'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #fffbeb;
+    --tw-ring-color: #fde68a;
+}
+.fi-sc-section[data-card-color='violet'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #f5f3ff;
+    --tw-ring-color: #ddd6fe;
+}
+.fi-sc-section[data-card-color='cyan'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #ecfeff;
+    --tw-ring-color: #a5f3fc;
+}
+.fi-sc-section[data-card-color='rose'] .fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    background-color: #fff1f2;
+    --tw-ring-color: #fecdd3;
+}

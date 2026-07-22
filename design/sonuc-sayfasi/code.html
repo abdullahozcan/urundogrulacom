@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ürün Doğrulama - Urundogrula</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "trust-blue": "#002FC9",
+                    "on-primary-fixed-variant": "#002fc9",
+                    "on-background": "#191c20",
+                    "surface-container-highest": "#e1e2e8",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#dee0ff",
+                    "primary": "#001f90",
+                    "on-secondary-container": "#007236",
+                    "surface": "#f8f9ff",
+                    "tertiary": "#223148",
+                    "on-tertiary": "#ffffff",
+                    "status-error": "#D32F2F",
+                    "surface-ice": "#F8F9FF",
+                    "outline": "#757687",
+                    "surface-container": "#eceef3",
+                    "on-surface": "#191c20",
+                    "surface-dim": "#d8dae0",
+                    "on-primary-container": "#a4b0ff",
+                    "primary-container": "#002fc9",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#006d34",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e1e2e8",
+                    "inverse-surface": "#2e3135",
+                    "surface-bright": "#f8f9ff",
+                    "error-container": "#ffdad6",
+                    "status-warning": "#ED6C02",
+                    "on-tertiary-fixed": "#0c1c33",
+                    "tertiary-fixed-dim": "#b8c7e5",
+                    "on-primary-fixed": "#00105b",
+                    "on-primary": "#ffffff",
+                    "background": "#f8f9ff",
+                    "secondary-container": "#59fd90",
+                    "surface-container-low": "#f2f3f9",
+                    "deep-navy": "#0E1D34",
+                    "inverse-on-surface": "#eff0f6",
+                    "surface-container-high": "#e7e8ee",
+                    "tertiary-container": "#394760",
+                    "tertiary-fixed": "#d6e3ff",
+                    "on-tertiary-fixed-variant": "#394760",
+                    "on-secondary-fixed-variant": "#005225",
+                    "secondary-fixed": "#63ff94",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#bac3ff",
+                    "outline-variant": "#c5c5d8",
+                    "on-surface-variant": "#444655",
+                    "primary-fixed-dim": "#bac3ff",
+                    "success-green": "#00CC66",
+                    "on-tertiary-container": "#a7b5d3",
+                    "secondary-fixed-dim": "#37e279",
+                    "surface-tint": "#2f4de0",
+                    "on-secondary-fixed": "#00210b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-desktop": "48px",
+                    "gutter": "24px",
+                    "container-max-width": "1280px",
+                    "margin-mobile": "16px",
+                    "unit-sm": "8px",
+                    "unit-xs": "4px",
+                    "unit-xl": "48px",
+                    "unit-lg": "24px",
+                    "unit-md": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "code-data": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["30px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-data": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bg-grid-subtle {
+            background-image: linear-gradient(to right, rgba(14, 29, 52, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(14, 29, 52, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .inner-glow-success {
+            box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-surface-ice text-on-surface font-body-md min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-on-background border-b border-deep-navy/10 sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max-width mx-auto h-20">
+<div class="font-headline-md text-headline-md font-bold text-trust-blue dark:text-primary-fixed">
+                Urundogrula
+            </div>
+<nav class="hidden lg:flex items-center gap-unit-lg">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-trust-blue transition-colors font-headline-sm text-headline-sm" href="#">Verify Product</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-trust-blue transition-colors font-headline-sm text-headline-sm" href="#">Manufacturers</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-trust-blue transition-colors font-headline-sm text-headline-sm" href="#">Marketplace</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-trust-blue transition-colors font-headline-sm text-headline-sm" href="#">Security</a>
+</nav>
+<div class="flex items-center gap-unit-md">
+<button class="hidden sm:block text-trust-blue font-semibold px-unit-md py-unit-sm rounded hover:bg-surface-container-high transition-colors">Login</button>
+<button class="bg-trust-blue text-white font-bold px-unit-lg py-unit-sm rounded shadow-md hover:opacity-90 transition-all">Register</button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max-width mx-auto px-margin-mobile md:px-margin-desktop py-unit-xl space-y-unit-xl">
+<!-- Hero Section: Verification Status -->
+<section class="relative bg-white border border-deep-navy/10 rounded-xl overflow-hidden p-unit-xl flex flex-col md:flex-row items-center gap-unit-xl shadow-sm">
+<div class="absolute inset-0 bg-grid-subtle pointer-events-none opacity-50"></div>
+<div class="relative z-10 flex-shrink-0">
+<div class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-success-green/10 flex items-center justify-center inner-glow-success border-4 border-success-green/20 animate-pulse-slow">
+<span class="material-symbols-outlined text-success-green !text-[64px] md:!text-[96px]" style="font-variation-settings: 'wght' 700;">verified</span>
+</div>
+</div>
+<div class="relative z-10 text-center md:text-left">
+<span class="inline-block bg-success-green/10 text-success-green font-label-caps text-label-caps px-unit-md py-1 rounded-full mb-unit-sm uppercase tracking-widest">
+                    Doğrulanmış Kayıt
+                </span>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-deep-navy mb-unit-xs">
+                    Ürün Doğrulandı
+                </h1>
+<p class="text-on-surface-variant font-body-md text-body-md flex items-center justify-center md:justify-start gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                    Doğrulama Zamanı: <span class="font-bold">24 Ekim 2024, 14:32:05 (GMT+3)</span>
+</p>
+<div class="mt-unit-lg flex flex-wrap gap-unit-sm justify-center md:justify-start">
+<div class="flex items-center gap-2 px-unit-md py-unit-xs bg-surface-container rounded border border-deep-navy/5">
+<span class="material-symbols-outlined text-trust-blue text-[18px]">security</span>
+<span class="text-body-sm font-code-data">Sertifika ID: #UD-9928-8812-TX</span>
+</div>
+</div>
+</div>
+<div class="hidden xl:block absolute right-12 top-1/2 -translate-y-1/2 opacity-10">
+<span class="material-symbols-outlined !text-[200px] text-deep-navy">verified_user</span>
+</div>
+</section>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-unit-lg items-start">
+<!-- Left: Product Information (8 Columns) -->
+<div class="lg:col-span-8 space-y-unit-lg">
+<div class="bg-white border border-deep-navy/10 rounded-xl overflow-hidden shadow-sm">
+<div class="px-unit-lg py-unit-md bg-surface-ice border-b-2 border-trust-blue flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm text-deep-navy font-bold">Ürün Bilgileri</h2>
+<span class="material-symbols-outlined text-trust-blue">inventory_2</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<tbody>
+<tr class="bg-surface-ice/50 border-b border-deep-navy/5">
+<th class="px-unit-lg py-unit-md font-label-caps text-label-caps text-on-surface-variant w-1/3">Ürün Adı</th>
+<td class="px-unit-lg py-unit-md font-headline-sm text-headline-sm text-deep-navy">Quantum-X Pro Endüstriyel İşlemci</td>
+</tr>
+<tr class="border-b border-deep-navy/5">
+<th class="px-unit-lg py-unit-md font-label-caps text-label-caps text-on-surface-variant">Seri Numarası</th>
+<td class="px-unit-lg py-unit-md font-code-data text-code-data text-trust-blue font-bold tracking-wider">SN-2024-QX88-A9Z</td>
+</tr>
+<tr class="bg-surface-ice/50 border-b border-deep-navy/5">
+<th class="px-unit-lg py-unit-md font-label-caps text-label-caps text-on-surface-variant">Üretici Firma</th>
+<td class="px-unit-lg py-unit-md font-body-md text-body-md text-on-surface font-semibold">Urun-Tech Global Endüstri A.Ş.</td>
+</tr>
+<tr class="border-b border-deep-navy/5">
+<th class="px-unit-lg py-unit-md font-label-caps text-label-caps text-on-surface-variant">Üretim Tarihi</th>
+<td class="px-unit-lg py-unit-md font-body-md text-body-md text-on-surface">15 Mayıs 2024</td>
+</tr>
+<tr class="bg-surface-ice/50">
+<th class="px-unit-lg py-unit-md font-label-caps text-label-caps text-on-surface-variant">Son Kullanma / Garanti</th>
+<td class="px-unit-lg py-unit-md font-body-md text-body-md text-on-surface">15 Mayıs 2029</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Documentation Section -->
+<div class="space-y-unit-md">
+<h2 class="font-headline-sm text-headline-sm text-deep-navy font-bold px-unit-xs">Resmi Belgeler ve Sertifikalar</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-unit-md">
+<!-- Quality Cert -->
+<div class="group bg-white border border-deep-navy/10 rounded-xl p-unit-md flex flex-col gap-unit-sm hover:border-trust-blue transition-all cursor-pointer shadow-sm">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
+<span class="material-symbols-outlined !text-[28px]">verified</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-deep-navy mb-1">Kalite Sertifikası</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">ISO 9001:2015 Uyumlu</p>
+</div>
+<button class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-body-sm group-hover:underline">
+<span class="material-symbols-outlined text-[18px]">download</span> İndir (PDF)
+                            </button>
+</div>
+<!-- Origin Cert -->
+<div class="group bg-white border border-deep-navy/10 rounded-xl p-unit-md flex flex-col gap-unit-sm hover:border-trust-blue transition-all cursor-pointer shadow-sm">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
+<span class="material-symbols-outlined !text-[28px]">public</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-deep-navy mb-1">Menşei Şahadetnamesi</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Türkiye Cumhuriyeti</p>
+</div>
+<button class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-body-sm group-hover:underline">
+<span class="material-symbols-outlined text-[18px]">download</span> İndir (PDF)
+                            </button>
+</div>
+<!-- User Manual -->
+<div class="group bg-white border border-deep-navy/10 rounded-xl p-unit-md flex flex-col gap-unit-sm hover:border-trust-blue transition-all cursor-pointer shadow-sm">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
+<span class="material-symbols-outlined !text-[28px]">menu_book</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-deep-navy mb-1">Kullanım Kılavuzu</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Türkçe / İngilizce</p>
+</div>
+<button class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-body-sm group-hover:underline">
+<span class="material-symbols-outlined text-[18px]">menu_book</span> Görüntüle
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Product Preview & Security (4 Columns) -->
+<aside class="lg:col-span-4 space-y-unit-lg">
+<!-- Product Image -->
+<div class="bg-white border border-deep-navy/10 rounded-xl p-unit-md shadow-sm">
+<div class="aspect-square bg-surface-container rounded-lg overflow-hidden mb-unit-md relative">
+<img class="w-full h-full object-cover" data-alt="A high-end industrial product photography of a sleek metallic processor chip, Quantum-X Pro, resting on a white laboratory surface. The lighting is crisp and professional, using a cold studio white to emphasize the technology's precision. Subtle blue lighting accents from the side reflect off the metallic surface. The background is slightly blurred, showing a clean, modern high-tech manufacturing facility with minimalist aesthetics and corporate precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3WDBsRlr_bu-XgPFeiPRO2QWrBExrZde-5XZY0ksmPgKn7rxNrRIeMMRU-72SCsENrB1TWXjZhcTlrg7GUj4CEz6ELx_gnDMoEdAJY13dMhfZX7jGjqAjgAugMuN4FYus8R5z6CEdZesVqGKEuUkb5igd0-51NHig4TSd3lOnbvnjohYyhC3fvZl1nIV3lKXihdm0d-LfuL0UxWScdr6uxmJ7n8QI-wTUd0kxndYb5Y0FPHBzV9GKZD0ZegXOCek4qu6tKhHk-g"/>
+<div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-unit-md py-1 rounded-full shadow-md">
+<span class="text-label-caps font-bold text-deep-navy">FİZİKSEL ÜRÜN</span>
+</div>
+</div>
+<div class="space-y-unit-xs">
+<h4 class="text-body-sm font-label-caps text-on-surface-variant">Üretici Görseli</h4>
+<p class="text-body-sm text-on-surface italic">Görsel, sistem kayıtlarındaki orijinal ürün ile eşleşmektedir.</p>
+</div>
+</div>
+<!-- Security Checklist -->
+<div class="bg-deep-navy text-white rounded-xl p-unit-lg shadow-lg relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined !text-[120px]">shield</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-headline-sm text-headline-sm mb-unit-md flex items-center gap-2">
+<span class="material-symbols-outlined">security</span>
+                            Güvenlik Bilgisi
+                        </h3>
+<ul class="space-y-unit-md">
+<li class="flex gap-unit-md">
+<span class="material-symbols-outlined text-success-green">check_circle</span>
+<div class="text-body-sm">
+<p class="font-bold">Manipülasyon Korumalı</p>
+<p class="text-surface-variant/70">Bu kayıt blockchain tabanlı sistemimizle mühürlenmiştir.</p>
+</div>
+</li>
+<li class="flex gap-unit-md">
+<span class="material-symbols-outlined text-success-green">check_circle</span>
+<div class="text-body-sm">
+<p class="font-bold">Yetkili Satıcı</p>
+<p class="text-surface-variant/70">Ürün yetkili bir dağıtım kanalından tedarik edilmiştir.</p>
+</div>
+</li>
+<li class="flex gap-unit-md">
+<span class="material-symbols-outlined text-success-green">check_circle</span>
+<div class="text-body-sm">
+<p class="font-bold">Aktif Garanti</p>
+<p class="text-surface-variant/70">Garanti süreci 1,672 gün daha devam etmektedir.</p>
+</div>
+</li>
+</ul>
+<button class="w-full mt-unit-xl bg-white text-deep-navy font-bold py-unit-md rounded-lg hover:bg-surface-ice transition-colors">
+                            Sertifikayı Doğrula
+                        </button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-deep-navy dark:bg-on-background border-t-2 border-trust-blue mt-unit-xl">
+<div class="w-full py-unit-xl px-margin-mobile md:px-margin-desktop max-w-container-max-width mx-auto flex flex-col md:flex-row justify-between items-center gap-unit-lg">
+<div class="flex flex-col items-center md:items-start gap-unit-sm">
+<div class="font-headline-sm text-headline-sm font-bold text-white">Urundogrula</div>
+<p class="font-body-sm text-body-sm text-surface-variant/70">© 2024 urundogrula.com - Resmi Ürün Doğrulama Servisi</p>
+</div>
+<div class="flex flex-wrap justify-center gap-unit-lg">
+<a class="text-surface-variant/70 font-body-sm text-body-sm hover:text-white transition-colors" href="#">Privacy Policy</a>
+<a class="text-surface-variant/70 font-body-sm text-body-sm hover:text-white transition-colors" href="#">Terms of Service</a>
+<a class="text-surface-variant/70 font-body-sm text-body-sm hover:text-white transition-colors" href="#">Security Protocol</a>
+<a class="text-surface-variant/70 font-body-sm text-body-sm hover:text-white transition-colors" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-surface-container-lowest dark:bg-on-background border-t border-deep-navy/10 shadow-lg rounded-t-full">
+<div class="flex flex-col items-center justify-center bg-primary-fixed dark:bg-primary-container text-on-primary-fixed dark:text-on-primary-container rounded-full p-2 scale-95 duration-100">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">Doğrula</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">Geçmiş</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-caps text-label-caps">Belgeler</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-label-caps">Profil</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for the verification badge
+        document.addEventListener('DOMContentLoaded', () => {
+            const badge = document.querySelector('.animate-pulse-slow');
+            if (badge) {
+                badge.style.animation = 'badgePulse 4s infinite ease-in-out';
+            }
+        });
+
+        // Simple animation style injection
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes badgePulse {
+                0% { transform: scale(1); box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.1); }
+                50% { transform: scale(1.03); box-shadow: inset 0 0 20px rgba(0, 204, 102, 0.25); }
+                100% { transform: scale(1); box-shadow: inset 0 0 12px rgba(0, 204, 102, 0.1); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body></html>
