@@ -8,6 +8,7 @@ return [
         'name' => 'Product Name',
         'description' => 'Description',
         'category' => 'Category',
+        'redirect_url' => 'Redirect URL',
     ],
     'product' => [
         'label' => 'Product',

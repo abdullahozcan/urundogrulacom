@@ -23,6 +23,7 @@ class Product extends Model
         'digital_file_path',
         'qr_mode',
         'general_qr_code',
+        'redirect_url',
         'expiration_date',
         'serial_number',
         'youtube_url',
@@ -46,6 +47,10 @@ class Product extends Model
         static::saving(function (Product $product): void {
             if ($product->qr_mode !== 'general') {
                 $product->general_qr_code = null;
+            }
+
+            if ($product->qr_mode !== 'unique') {
+                $product->redirect_url = null;
             }
 
             if (!$product->category_id) {

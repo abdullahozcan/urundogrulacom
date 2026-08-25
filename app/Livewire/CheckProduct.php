@@ -15,6 +15,8 @@ class CheckProduct extends Component
     public $uuid;
     public $item;
     public $scanSaved = false;
+    public $redirectUrl = null;
+    public $scanRedirected = false;
 
     public $deviceToken = '';
     public $existingReview = null;
@@ -38,6 +40,12 @@ class CheckProduct extends Component
 
         if (!$this->item) {
             abort(404, 'Product not found or invalid QR code.');
+        }
+
+        $product = $this->item->batch?->product;
+
+        if ($product && $product->qr_mode === 'unique' && $product->redirect_url) {
+            $this->redirectUrl = $product->redirect_url;
         }
 
         $this->deviceToken = request()->cookie('device_token', (string) Str::uuid());
@@ -86,6 +94,12 @@ class CheckProduct extends Component
 
         $this->item->update(['is_scanned' => true]);
         $this->scanSaved = true;
+
+        if ($this->redirectUrl && !$this->scanRedirected) {
+            $this->scanRedirected = true;
+
+            return redirect()->away($this->redirectUrl);
+        }
     }
 
     public function submitReview()

@@ -45,10 +45,17 @@
                     Doğrulanmış Kayıt
                 </span>
                 <h1 class="text-3xl md:text-4xl font-bold text-deep-navy mb-1 tracking-tight">Ürün Doğrulandı</h1>
-                <p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-1 text-sm">
-                    <span class="material-symbols-outlined text-sm">schedule</span>
-                    Doğrulama Zamanı: <span class="font-bold">{{ now()->locale(app()->getLocale())->isoFormat('DD MMMM YYYY, HH:mm:ss') }} (GMT+3)</span>
-                </p>
+                @if($redirectUrl)
+                    <p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-1 text-sm">
+                        <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        Yönlendiriliyorsunuz: <span class="font-bold break-all">{{ $redirectUrl }}</span>
+                    </p>
+                @else
+                    <p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-1 text-sm">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        Doğrulama Zamanı: <span class="font-bold">{{ now()->locale(app()->getLocale())->isoFormat('DD MMMM YYYY, HH:mm:ss') }} (GMT+3)</span>
+                    </p>
+                @endif
             @else
                 <span class="inline-block bg-status-warning/10 text-status-warning font-bold text-xs px-3 py-1 rounded-full mb-2 uppercase tracking-widest">
                     Doğrulanıyor
@@ -379,9 +386,14 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('productCheck', () => ({
             mediaOpen: false,
+            redirectUrl: @js($redirectUrl),
+            scanRequested: false,
             init() {
                 this.setDeviceCookie();
                 this.getLocation();
+                if (this.redirectUrl) {
+                    setTimeout(() => this.finishScan(), 2000);
+                }
             },
             setDeviceCookie() {
                 const name = 'device_token';
@@ -390,19 +402,23 @@
                     document.cookie = name + '=' + value + '; path=/; max-age=' + (60 * 60 * 24 * 365 * 10);
                 }
             },
+            finishScan(lat = null, lng = null) {
+                if (this.scanRequested) return;
+                this.scanRequested = true;
+                Livewire.dispatch('saveScan', { lat, lng });
+            },
             getLocation() {
-                if (!navigator.geolocation) return;
+                if (!navigator.geolocation) {
+                    this.finishScan();
+                    return;
+                }
+                const options = this.redirectUrl
+                    ? { timeout: 2000 }
+                    : { enableHighAccuracy: true, timeout: 10000 };
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        Livewire.dispatch('saveScan', {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                        });
-                    },
-                    () => {
-                        Livewire.dispatch('saveScan', { lat: null, lng: null });
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    (position) => this.finishScan(position.coords.latitude, position.coords.longitude),
+                    () => this.finishScan(),
+                    options
                 );
             }
         }));

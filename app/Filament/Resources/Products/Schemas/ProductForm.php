@@ -216,6 +216,12 @@ class ProductForm
                                                 };
                                             })
                                             ->unique(ignoreRecord: true),
+                                        TextInput::make('redirect_url')
+                                            ->label(__('filament.fields.redirect_url'))
+                                            ->url()
+                                            ->placeholder('https://example.com/...')
+                                            ->helperText('QR okutulduğunda tarama kaydı alındıktan sonra kullanıcı en fazla 2 saniye içinde bu adrese yönlendirilir.')
+                                            ->visible(fn ($get) => $get('qr_mode') === 'unique'),
                                     ]),
                             ]),
                         Tab::make(__('filament.product.sections.digital'))

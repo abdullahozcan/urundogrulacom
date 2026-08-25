@@ -101,6 +101,7 @@ tests/
 - `digital_file_path`, `expiration_date`, `serial_number`
 - `qr_mode`: unique | general
 - `general_qr_code`: nullable, sadece `qr_mode=general` iken dolu
+- `redirect_url`: nullable, sadece `qr_mode=unique` iken dolu — QR okutulduğunda tarama kaydı düşüldükten sonra kullanıcı bu URL'e (en fazla 2 sn içinde) yönlendirilir
 - Sosyal medya: `whatsapp`, `instagram`, `facebook`, `twitter`, `youtube`, `website`, `email`
 - Validasyon: category_id aynı company'e ait olmalı
 
@@ -130,6 +131,7 @@ tests/
 4. **Tüketici** → Kodu okutur → `/check/{uuid}` Livewire sayfası
 5. **Scan** kaydı düşülür (konum, tarayıcı, IP, cihaz tipi)
 6. Ürün detayları + dijital içerik (PDF/video) + sosyal medya bağlantıları görüntülenir
+   - `qr_mode=unique` ve `redirect_url` dolu ürünlerde: tarama kaydı sonrası kullanıcı (en fazla 2 sn bekleterek) `redirect_url`'e yönlendirilir
 
 ---
 
@@ -188,7 +190,7 @@ php artisan config:clear --ansi && php artisan test
 
 ### Test Dosyaları
 - `CategoryTenantIsolationTest` — kategori CRUD tenant izolasyonu
-- `ProductQrModeTest` — unique/general QR modu validasyonu
+- `ProductQrModeTest` — unique/general QR modu validasyonu, `redirect_url` davranışı
 - `CrossTenantAssignmentTest` — farklı şirket kategorisi atama reddi
 - `NavigationVisibilityTest` — super admin vs company admin menü (Company+User artık company admin'e de açık)
 - `SubCompanyIsolationTest` — parent'ın child verilerini görebildiği, child'ın parent'ı göremediği, sibling'lerin birbirini görmediği doğrulanır

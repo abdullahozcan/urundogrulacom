@@ -8,6 +8,7 @@ return [
         'name' => 'Ürün Adı',
         'description' => 'Açıklama',
         'category' => 'Kategori',
+        'redirect_url' => 'Yönlendirme Linki (URL)',
     ],
     'product' => [
         'label' => 'Ürün',
