@@ -221,7 +221,7 @@ class ProductForm
                                             ->url()
                                             ->placeholder('https://example.com/...')
                                             ->helperText('QR okutulduğunda tarama kaydı alındıktan sonra kullanıcı en fazla 2 saniye içinde bu adrese yönlendirilir.')
-                                            ->visible(fn ($get) => $get('qr_mode') === 'unique'),
+                                            ->dehydratedWhenHidden(),
                                     ]),
                             ]),
                         Tab::make(__('filament.product.sections.digital'))

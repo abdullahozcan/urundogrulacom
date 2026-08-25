@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Item;
+use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\Scan;
 use Livewire\Attributes\Layout;
@@ -39,12 +40,20 @@ class CheckProduct extends Component
         ])->where('uuid', $uuid)->first();
 
         if (!$this->item) {
-            abort(404, 'Product not found or invalid QR code.');
+            $generalProduct = Product::query()
+                ->where('general_qr_code', $uuid)
+                ->first();
+
+            if (!$generalProduct || !$generalProduct->redirect_url) {
+                abort(404, 'Product not found or invalid QR code.');
+            }
+
+            return redirect()->away($generalProduct->redirect_url);
         }
 
         $product = $this->item->batch?->product;
 
-        if ($product && $product->qr_mode === 'unique' && $product->redirect_url) {
+        if ($product && $product->redirect_url) {
             $this->redirectUrl = $product->redirect_url;
         }
 

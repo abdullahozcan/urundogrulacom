@@ -101,7 +101,7 @@ tests/
 - `digital_file_path`, `expiration_date`, `serial_number`
 - `qr_mode`: unique | general
 - `general_qr_code`: nullable, sadece `qr_mode=general` iken dolu
-- `redirect_url`: nullable, sadece `qr_mode=unique` iken dolu — QR okutulduğunda tarama kaydı düşüldükten sonra kullanıcı bu URL'e (en fazla 2 sn içinde) yönlendirilir
+- `redirect_url`: nullable, her iki modda da kullanılabilir — QR okutulduğunda tarama kaydı düşüldükten sonra kullanıcı bu URL'e (en fazla 2 sn içinde) yönlendirilir; genel QR ürünlerinde anında yönlendirilir (item/scan kaydı yok)
 - Sosyal medya: `whatsapp`, `instagram`, `facebook`, `twitter`, `youtube`, `website`, `email`
 - Validasyon: category_id aynı company'e ait olmalı
 
@@ -131,7 +131,7 @@ tests/
 4. **Tüketici** → Kodu okutur → `/check/{uuid}` Livewire sayfası
 5. **Scan** kaydı düşülür (konum, tarayıcı, IP, cihaz tipi)
 6. Ürün detayları + dijital içerik (PDF/video) + sosyal medya bağlantıları görüntülenir
-   - `qr_mode=unique` ve `redirect_url` dolu ürünlerde: tarama kaydı sonrası kullanıcı (en fazla 2 sn bekleterek) `redirect_url`'e yönlendirilir
+   - `redirect_url` dolu ürünlerde: tarama kaydı sonrası kullanıcı (en fazla 2 sn bekleterek) `redirect_url`'e yönlendirilir; genel QR ürünlerinde `general_qr_code` ile eşleşen ürün anında yönlendirilir
 
 ---
 

@@ -49,10 +49,6 @@ class Product extends Model
                 $product->general_qr_code = null;
             }
 
-            if ($product->qr_mode !== 'unique') {
-                $product->redirect_url = null;
-            }
-
             if (!$product->category_id) {
                 return;
             }

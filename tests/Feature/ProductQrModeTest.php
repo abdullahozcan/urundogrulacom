@@ -27,7 +27,7 @@ class ProductQrModeTest extends TestCase
         $this->assertNull($product->fresh()->general_qr_code);
     }
 
-    public function test_redirect_url_is_cleared_when_mode_is_general(): void
+    public function test_redirect_url_is_preserved_for_general_mode(): void
     {
         $company = Company::factory()->create();
 
@@ -38,7 +38,37 @@ class ProductQrModeTest extends TestCase
             'redirect_url' => 'https://example.com',
         ]);
 
-        $this->assertNull($product->fresh()->redirect_url);
+        $this->assertSame('https://example.com', $product->fresh()->redirect_url);
+    }
+
+    public function test_general_product_with_redirect_url_redirects_immediately(): void
+    {
+        $company = Company::factory()->create();
+
+        $product = Product::factory()->create([
+            'company_id' => $company->id,
+            'qr_mode' => 'general',
+            'general_qr_code' => 'GENERAL-REDIRECT-CODE',
+            'redirect_url' => 'https://example.com',
+        ]);
+
+        $this->get(route('product.check', $product->general_qr_code))
+            ->assertRedirect('https://example.com');
+    }
+
+    public function test_general_product_without_redirect_url_still_404s(): void
+    {
+        $company = Company::factory()->create();
+
+        $product = Product::factory()->create([
+            'company_id' => $company->id,
+            'qr_mode' => 'general',
+            'general_qr_code' => 'GENERAL-NO-REDIRECT-CODE',
+            'redirect_url' => null,
+        ]);
+
+        $this->get(route('product.check', $product->general_qr_code))
+            ->assertNotFound();
     }
 
     public function test_unique_product_with_redirect_url_redirects_after_scan(): void
