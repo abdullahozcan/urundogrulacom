@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\ScanRecorded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Scan extends Model
 {
     use HasFactory;
+
+    protected $dispatchesEvents = [
+        'created' => ScanRecorded::class,
+    ];
 
     protected $fillable = [
         'item_id',
