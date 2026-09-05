@@ -203,6 +203,10 @@ class ProductForm
                                             ->uuid()
                                             ->minLength(3)
                                             ->maxLength(255)
+                                            ->unique(
+                                                modifyQueryUsing: fn ($query) => $query->whereNotNull('general_qr_code'),
+                                                ignoreRecord: true,
+                                            )
                                             ->suffixAction(
                                                 Action::make('generate_general_qr_code')
                                                     ->label('Otomatik Oluştur')

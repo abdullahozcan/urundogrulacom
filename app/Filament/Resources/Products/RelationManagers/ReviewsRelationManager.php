@@ -22,7 +22,7 @@ class ReviewsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return false;
+        return true;
     }
 
     public function table(Table $table): Table
@@ -46,21 +46,6 @@ class ReviewsRelationManager extends RelationManager
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc')
-            ->recordActions([
-                Action::make('toggleApproval')
-                    ->label(fn (ProductReview $record): string => $record->is_approved ? __('filament.actions.unapprove') : __('filament.actions.approve'))
-                    ->icon(fn (ProductReview $record): string => $record->is_approved ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (ProductReview $record): string => $record->is_approved ? 'warning' : 'success')
-                    ->action(function (ProductReview $record): void {
-                        $record->update(['is_approved' => !$record->is_approved]);
-
-                        Notification::make()
-                            ->title($record->is_approved ? __('filament.actions.approved') : __('filament.actions.unapproved'))
-                            ->success()
-                            ->send();
-                    }),
-                DeleteAction::make(),
-            ]);
+            ->defaultSort('created_at', 'desc');
     }
 }

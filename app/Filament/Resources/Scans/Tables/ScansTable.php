@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Scans\Tables;
 
+use App\Models\Scan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +46,40 @@ class ScansTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filter::make('date_range')
+                    ->label('Tarih Aralığı')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('Başlangıç'),
+                        DatePicker::make('until')
+                            ->label('Bitiş')
+                            ->after('from'),
+                    ])
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['from'] ?? null) {
+                            $indicators[] = 'Başlangıç: ' . $data['from'];
+                        }
+
+                        if ($data['until'] ?? null) {
+                            $indicators[] = 'Bitiş: ' . $data['until'];
+                        }
+
+                        return $indicators;
+                    })
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '>=', $date))
+                            ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date));
+                    }),
+                SelectFilter::make('device_type')
+                    ->label('Cihaz Tipi')
+                    ->options([
+                        'Mobile' => 'Mobil',
+                        'Tablet' => 'Tablet',
+                        'Desktop' => 'Masaüstü',
+                    ]),
                 SelectFilter::make('product_id')
                     ->label('Ürün')
                     ->options(fn () => \App\Models\Product::query()
