@@ -34,7 +34,8 @@ app/
 │   ├── ActionExecuted.php                   # Kural yürütülünce fırlatılır (payload ile)
 │   └── ScanRecorded.php                     # Scan oluşunca fırlatılır (aksiyon motoru girişi)
 ├── Filament/
-│   ├── Resources/                           # 11 resource (her biri → Form/Table/Pages)
+│   ├── Resources/                           # 12 resource (her biri → Form/Table/Pages)
+│   │   ├── ActionRules/                     # Aksiyon kuralı CRUD + flag toggle (super admin)
 │   │   ├── Batches/
 │   │   ├── Categories/
 │   │   ├── Companies/
@@ -168,6 +169,8 @@ tests/
 - **ActionEngine akışı:** kural seçimi (product'ın + firma geneli, priority sıralı) → trigger değerlendirme (eşleşmezse log yok) → limit/pencere kontrolü (bloklanırsa `skipped` log) → dedup → aksiyon yürütme → `success`/`failed` log + `times_executed` artışı + `ActionExecuted` event
 - Trigger'lar (`app/Services/ActionEngine/Triggers/`): scan_count (item/product/company kapsamı), first_scan, date_range, item_revisit (after_days)
 - Aksiyonlar (`app/Services/ActionEngine/Actions/`): show_content (check sayfasına içerik), redirect (URL validasyonlu), webhook (HMAC imzalı queue job), notify_admin (queue e-posta)
+- **Filament:** `ActionRuleResource` (Ürün Yönetimi grubu; tenant izolasyonlu, `config.*`/`payload.*` alanları kayıtta `trigger_config`/`action_payload`'a birleşir). ListActionRules sayfasında super admin için **flag toggle** header action (`action_engine_enabled` Setting + cache clear)
+- **CheckProduct entegrasyonu:** scan kaydı sonrası o scan'in `success` log'ları okunur; `show_content` → banner (blade otomatik escape, string veya {tr,en} array destekler), `redirect` → ürünün kendi `redirect_url`'i yoksa kural URL'i kullanılır (ikisi asla birlikte tetiklenmez)
 - **Sistem etkisi sıfır:** motor hatası scan kaydını ve check akışını etkilemez (her kural kendi try/catch'inde)
 
 ### `posts` / `pages` / `settings` — Dinamik içerik (translatable)
@@ -265,6 +268,8 @@ php artisan config:clear --ansi && php artisan test
 - `ActionRuleTriggerTest` — 4 tetikleyici tipi + limit + zaman penceresi davranışı
 - `ActionEngineDedupTest` — aynı scan için çift yürütme engeli + firma geneli kuralı
 - `ActionEngineFailSafeTest` — webhook hatası loglanır, flag kapalı no-op, geçersiz redirect failed
+- `ActionRuleTenantIsolationTest` — kural CRUD tenant izolasyonu (list + canView/canEdit/canDelete)
+- `ActionEngineRenderTest` — show_content banner + redirect önceliği (ürün redirect > kural) + flag kapalı banner yok
 
 ---
 

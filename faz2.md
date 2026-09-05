@@ -149,9 +149,9 @@ app/
 3. `ScanRecorded` event + `EvaluateActionRules` listener (flag kapalı no-op) — YAPILDI
 4. `ActionEngine` + Trigger sınıfları + `ActionLogs` dedup — YAPILDI
 5. Action sınıfları: `ShowContent` → `NotifyAdmin` → `Redirect` → `Webhook` (risk sırasıyla) — YAPILDI
-6. Filament: `ActionRuleResource` (tenant izolasyonlu, öncelik + limit alanları) — BEKLİYOR
-7. CheckProduct render entegrasyonu (koşullu blok, sanitize) — BEKLİYOR
-8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon — KISMEN (trigger/dedup/fail-safe testleri yazıldı)
+6. Filament: `ActionRuleResource` (tenant izolasyonlu, öncelik + limit alanları) — YAPILDI (flag toggle dahil)
+7. CheckProduct render entegrasyonu (koşullu blok, sanitize) — YAPILDI
+8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon — KISMEN (trigger/dedup/fail-safe/tenant/render testleri yazıldı)
 9. Pilot: tek demo firmada flag açma — BEKLİYOR
 
 ### 3.6 Aksiyon Motoru Kabul Kriterleri

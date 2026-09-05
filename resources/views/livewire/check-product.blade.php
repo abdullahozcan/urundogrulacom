@@ -75,6 +75,24 @@
         </div>
     </section>
 
+    {{-- Action Engine Banner --}}
+    @if($scanSaved && $actionContent)
+        @php $isWarning = $actionContent['style'] === 'warning'; @endphp
+        <section class="{{ $isWarning ? 'bg-status-warning/10 border-status-warning/30' : 'bg-trust-blue/10 border-trust-blue/30' }} border rounded-xl px-6 py-4 flex items-start gap-3 shadow-sm">
+            <span class="material-symbols-outlined {{ $isWarning ? 'text-status-warning' : 'text-trust-blue' }} flex-shrink-0">
+                {{ $isWarning ? 'warning' : 'campaign' }}
+            </span>
+            <div>
+                @if($actionContent['title'])
+                    <h3 class="font-semibold {{ $isWarning ? 'text-status-warning' : 'text-trust-blue' }}">{{ $actionContent['title'] }}</h3>
+                @endif
+                @if($actionContent['body'])
+                    <p class="text-sm text-on-surface">{{ $actionContent['body'] }}</p>
+                @endif
+            </div>
+        </section>
+    @endif
+
     {{-- Main Content Grid --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {{-- Left: Product Information (8 cols) --}}

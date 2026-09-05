@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\ActionLog;
+use App\Models\ActionRule;
 use App\Models\Item;
 use App\Models\Product;
 use App\Models\ProductReview;
@@ -18,6 +20,7 @@ class CheckProduct extends Component
     public $scanSaved = false;
     public $redirectUrl = null;
     public $scanRedirected = false;
+    public $actionContent = null;
 
     public $deviceToken = '';
     public $existingReview = null;
@@ -92,7 +95,7 @@ class CheckProduct extends Component
             $deviceType = preg_match('/mobile|android|iphone|ipad/i', $agent ?? '') ? 'Mobile' : 'Desktop';
         }
 
-        Scan::create([
+        $scan = Scan::create([
             'item_id' => $this->item->id,
             'ip_address' => request()->ip(),
             'lat' => $validated['lat'],
@@ -104,11 +107,64 @@ class CheckProduct extends Component
         $this->item->update(['is_scanned' => true]);
         $this->scanSaved = true;
 
+        $this->loadActionResults($scan->id);
+
         if ($this->redirectUrl && !$this->scanRedirected) {
             $this->scanRedirected = true;
 
             return redirect()->away($this->redirectUrl);
         }
+    }
+
+    private function loadActionResults(int $scanId): void
+    {
+        $logs = ActionLog::query()
+            ->where('scan_id', $scanId)
+            ->where('result', ActionLog::RESULT_SUCCESS)
+            ->whereHas('rule', function ($query) {
+                $query->whereIn('action_type', [
+                    ActionRule::ACTION_SHOW_CONTENT,
+                    ActionRule::ACTION_REDIRECT,
+                ]);
+            })
+            ->with('rule')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($logs as $log) {
+            $rule = $log->rule;
+
+            if (!$rule) {
+                continue;
+            }
+
+            if ($rule->action_type === ActionRule::ACTION_SHOW_CONTENT) {
+                $payload = $rule->action_payload ?? [];
+
+                $this->actionContent = [
+                    'title' => $this->resolveLocaleValue($payload['title'] ?? null),
+                    'body' => $this->resolveLocaleValue($payload['body'] ?? null),
+                    'style' => ($payload['style'] ?? 'info') === 'warning' ? 'warning' : 'info',
+                ];
+            } elseif ($rule->action_type === ActionRule::ACTION_REDIRECT && !$this->redirectUrl) {
+                $url = $rule->action_payload['url'] ?? null;
+
+                if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
+                    $this->redirectUrl = $url;
+                }
+            }
+        }
+    }
+
+    private function resolveLocaleValue($value)
+    {
+        if (is_array($value)) {
+            return $value[app()->getLocale()]
+                ?? $value[config('languages.default', 'tr')]
+                ?? reset($value);
+        }
+
+        return $value;
     }
 
     public function submitReview()
