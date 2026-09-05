@@ -15,6 +15,9 @@
 | Multi-Tenancy | Hiyerarşik (parent→child), 1 katman, `company_id` izolasyonu + `parent_id` |
 | Yetkilendirme | Spatie Laravel Permission + Filament Shield |
 | QR | simplesoftwareio/simple-qrcode |
+| PDF Üretimi | barryvdh/laravel-dompdf |
+| Cihaz Tespiti | hisorange/browser-detect |
+| Dil Seçici (Filament) | prunacatalin/filament-locale-switcher |
 | Harita | OpenStreetMap (Leaflet) |
 | Çoklu Dil | tr (varsayılan) / en, JSON translatable |
 | Test | PHPUnit 12.x |
@@ -27,6 +30,8 @@
 ```
 app/
 ├── Console/Commands/GrantSuperAdmin.php    # CLI: kullanıcıyı super admin yap
+├── Events/
+│   └── ScanRecorded.php                     # Scan oluşunca fırlatılır (aksiyon motoru girişi)
 ├── Filament/
 │   ├── Resources/                           # 11 resource (her biri → Form/Table/Pages)
 │   │   ├── Batches/
@@ -39,16 +44,36 @@ app/
 │   │   ├── Partners/
 │   │   ├── Posts/
 │   │   ├── Products/
+│   │   │   └── RelationManagers/
+│   │   │       ├── BatchesRelationManager.php    # Ürünün partileri
+│   │   │       └── ReviewsRelationManager.php    # Değerlendirme yönetimi (onay/red)
 │   │   ├── Scans/
 │   │   ├── Settings/
 │   │   └── Users/
-│   └── Widgets/                             # Dashboard widgetları (harita, grafik, vs.)
+│   └── Widgets/                             # Dashboard widgetları:
+│       ├── AccountWidget.php
+│       ├── CompanyInfoWidget.php
+│       ├── ItemScansChart.php               # Tarama grafiği
+│       ├── MapWidget.php                    # Tarama haritası (Leaflet, dark mode)
+│       ├── ScanHistoryWidget.php
+│       ├── ScanLocationWidget.php
+│       ├── ScansMapWidget.php
+│       └── TopScannedItemsWidget.php
 ├── Helpers/SettingHelper.php                # Site ayarları cache helper
-├── Http/Middleware/SetLocale.php            # Dil middleware
+├── Http/
+│   ├── Controllers/
+│   │   ├── ContactController.php            # İletişim sayfası + form (throttle: 5 dk/10)
+│   │   └── QrDownloadController.php         # Item/ürün QR indirme (PNG/PDF/SVG)
+│   └── Middleware/SetLocale.php             # Dil middleware
+├── Listeners/
+│   └── EvaluateActionRules.php              # ScanRecorded → aksiyon motoru (fail-safe, feature flag'li)
 ├── Livewire/
-│   ├── CheckProduct.php                     # Public QR sorgulama
+│   ├── CheckProduct.php                     # Public QR sorgulama + değerlendirme + redirect
 │   └── CompanySwitcher.php                  # Sidebar'da alt firma seçici
-├── Models/                                  # Company, Product, Batch, Item, Scan, Category, Post, Page, Partner, Setting, User
+├── Models/                                  # Company, Product, ProductDocument,
+│                                            # ProductReview, Batch, Item, Scan,
+│                                            # ActionRule, ActionLog, Category, Post,
+│                                            # Page, Partner, Setting, User
 ├── Policies/RolePolicy.php                  # Role bazlı policy
 ├── Providers/
 │   ├── AppServiceProvider.php
@@ -56,11 +81,12 @@ app/
 └── Traits/HasTranslations.php               # Çoklu dil trait'i
 
 config/
-├── languages.php                            # tr/en dil yapılandırması
-└── permission.php                           # Spatie Permission ayarları
+├── filament-locale-switcher.php             # Dil seçici widget ayarları
+├── languages.php                             # tr/en dil yapılandırması
+└── permission.php                            # Spatie Permission ayarları
 
 database/
-├── migrations/                              # 20 migration
+├── migrations/                               # 27 migration
 ├── factories/                               # Company, Product, Category, User factory
 └── seeders/DatabaseSeeder.php               # Demo veri + roller
 
@@ -95,7 +121,8 @@ tests/
 - `company_id` (FK), `parent_id` (self FK), `name`, `slug`, `description`, `is_active`
 
 ### `products` — Ürünler (çekirdek varlık)
-- `company_id` (FK), `category_id` (FK), `name`, `description`, `image`
+- `company_id` (FK), `category_id` (FK), `image`
+- `name`, `description`: **JSON translatable** `{"tr": "...", "en": "..."}` (HasTranslations trait)
 - `type`: physical | digital
 - `digital_content_type`: pdf | youtube | file
 - `digital_file_path`, `expiration_date`, `serial_number`
@@ -115,6 +142,21 @@ tests/
 ### `scans` — QR okutma kayıtları
 - `item_id`, `ip_address`, `lat`, `lng`, `browser`, `device_type`, `scanned_at`
 
+### `product_documents` — Ürün belgeleri
+- `product_id` (FK, cascade), `file_path`, `original_name`, `mime_type`, `sort_order`
+- Check sayfasında ve admin'de indirilebilir belgeler
+
+### `product_reviews` — Değerlendirmeler
+- `product_id` (FK, cascade), `rating` (tinyint), `comment` (nullable)
+- `cookie_token`: tek cihaz tek oy (unique: `product_id + cookie_token`)
+- `is_approved`: admin onayı gerekir (default false)
+
+### `action_rules` / `action_logs` — Aksiyon motoru (Faz 2, flag ile açılır)
+- Kural: `company_id`, `product_id` (nullable=firma geneli), `trigger_type` (scan_count | first_scan | date_range | item_revisit), `trigger_config` (JSON), `action_type` (show_content | redirect | webhook | notify_admin), `action_payload` (JSON), `priority`, `max_executions`, zaman penceresi
+- Log: `action_rule_id` + `scan_id` unique (dedup), `result`: success | failed | skipped
+- Mimar: `Scan::created` → `ScanRecorded` event → `EvaluateActionRules` listener (try/catch'li, `action_engine_enabled` settings flag'i kapalıyken no-op). Motor: `app/Services/ActionEngine/ActionEngine.php`
+- **Sistem etkisi sıfır:** motor hatası scan kaydını ve check akışını etkilemez
+
 ### `posts` / `pages` / `settings` — Dinamik içerik (translatable)
 - JSON translatable alanlar: `title`, `slug`, `content` / `value`
 
@@ -130,8 +172,9 @@ tests/
 3. **Item UUID** → QR kod basılır, ürüne iliştirilir
 4. **Tüketici** → Kodu okutur → `/check/{uuid}` Livewire sayfası
 5. **Scan** kaydı düşülür (konum, tarayıcı, IP, cihaz tipi)
-6. Ürün detayları + dijital içerik (PDF/video) + sosyal medya bağlantıları görüntülenir
+6. Ürün detayları + dijital içerik (PDF/video) + ürün belgeleri (product_documents) + sosyal medya bağlantıları görüntülenir
    - `redirect_url` dolu ürünlerde: tarama kaydı sonrası kullanıcı (en fazla 2 sn bekleterek) `redirect_url`'e yönlendirilir; genel QR ürünlerinde `general_qr_code` ile eşleşen ürün anında yönlendirilir
+7. **Tüketici değerlendirme:** Check sayfasından puan (1-5) + yorum gönderilir (cookie_token ile tek oy); admin, Products → ReviewsRelationManager'dan onaylar/red eder
 
 ---
 
@@ -153,12 +196,24 @@ tests/
 | HTTP | Path | İşlev |
 |---|---|---|
 | GET | `/` | Anasayfa (hero, blog, partner) |
-| GET | `/check/{uuid}` | QR sorgulama (Livewire) |
-| GET | `/blog/{slug}` | Blog detay |
-| GET | `/p/{slug}` | Statik sayfa |
-| GET | `/iletisim` | İletişim |
+| GET | `/check/{uuid}` | QR sorgulama (Livewire) + değerlendirme + redirect |
+| GET | `/blog/{slug}` | Blog detay (slug tüm destekli dillerde eşlenir) |
+| GET | `/p/{slug}` | Statik sayfa (slug tüm destekli dillerde eşlenir) |
+| GET | `/iletisim` | İletişim (ContactController) |
+| POST | `/iletisim` | İletişim formu gönderimi (throttle: 10 dk içinde 5) |
 | GET | `/sitemap.xml` | XML site haritası |
 | GET | `/locale/{lang}` | Dil değiştirme |
+
+### Admin QR İndirme Route'ları (`auth` + `admin` prefix)
+
+| HTTP | Path | İşlev |
+|---|---|---|
+| GET | `/admin/items/{item}/qr-png` | Item QR PNG indir |
+| GET | `/admin/items/{item}/qr-pdf` | Item QR PDF indir (Dompdf) |
+| GET | `/admin/items/{item}/qr-svg` | Item QR SVG indir |
+| GET | `/admin/products/{product}/qr-png` | Ürün (genel) QR PNG indir |
+| GET | `/admin/products/{product}/qr-pdf` | Ürün (genel) QR PDF indir |
+| GET | `/admin/products/{product}/qr-svg` | Ürün (genel) QR SVG indir |
 
 ---
 
