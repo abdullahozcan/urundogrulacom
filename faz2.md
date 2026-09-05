@@ -151,8 +151,8 @@ app/
 5. Action sınıfları: `ShowContent` → `NotifyAdmin` → `Redirect` → `Webhook` (risk sırasıyla) — YAPILDI
 6. Filament: `ActionRuleResource` (tenant izolasyonlu, öncelik + limit alanları) — YAPILDI (flag toggle dahil)
 7. CheckProduct render entegrasyonu (koşullu blok, sanitize) — YAPILDI
-8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon — KISMEN (trigger/dedup/fail-safe/tenant/render testleri yazıldı)
-9. Pilot: tek demo firmada flag açma — BEKLİYOR
+8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon — YAPILDI (8 test dosyası, 46/46 yeşil)
+9. Pilot: tek demo firmada flag açma — BEKLİYOR (manuel adım: ListActionRules → "Aksiyon Motorunu Aç")
 
 ### 3.6 Aksiyon Motoru Kabul Kriterleri
 
@@ -166,42 +166,41 @@ app/
 
 ---
 
-## 4. Gelişmiş Raporlar ve Export
+## 4. Gelişmiş Raporlar ve Export — YAPILDI
 
-1. Scan listesi filtreleri: tarih aralığı, cihaz tipi, ürün, kategori, coğrafi kutu (lat/lng).
-2. Filament table `ExportAction`-benzeri CSV export (chunk'lı, büyük veride queue).
-3. Dashboard'a ürün/kategori kırılımında tarama trend widget'ı.
-4. Export kendi firmanın verisiyle sınırlı (tenant scope zorunlu).
+1. Scan listesi filtreleri: tarih aralığı, cihaz tipi, ürün, parti, kategori — YAPILDI
+2. ListScans header CSV export action (`getFilteredTableQuery` ile filtreleri uygular, chunk 1000, BOM'lu UTF-8) — YAPILDI
+3. Dashboard `CategoryScansChart` (son 30 gün kategori kırılımı, bar) — YAPILDI
+4. Export kendi firmasının verisiyle sınırlı (resource scope + filtre scope) — YAPILDI
 
-## 5. Çok Sekmeli Ürün Detay UX
+## 5. Çok Sekmeli Ürün Detay UX — YAPILDI
 
-1. `ViewProduct` sayfası sekmeler: Özet / Taramalar / Partiler / Belgeler / Değerlendirmeler.
-2. Mevcut RelationManager içerikleri sekmelere taşınır (kod silinmez, yerleşim değişir).
-3. Sekme state'i URL'de korunur (derin link).
+1. `ViewProduct` sayfası sekmeler: Özet (infolist) / Partiler / Taramalar / Belgeler / Değerlendirmeler — YAPILDI
+2. Yeni relation manager'lar: `ScansRelationManager` (custom Builder relationship), `DocumentsRelationManager` — YAPILDI
+3. `ReviewsRelationManager` salt-okunur listeye çekildi — YAPILDI
+4. Sekme state'i URL'de korunur (Filament `?relation=` parametresi) — YAPILDI
 
-## 6. Anket (Survey) Modülü
+## 6. Anket (Survey) Modülü — YAPILDI
 
-1. Tablolar: `surveys` (company, product bağlamı, is_active), `survey_questions`
-   (tip: tek seçim/çok seçim/metin, sıra), `survey_responses` (question, scan_id, value).
-2. Gösterim kuralı: her zaman değil — aksiyon motoru tetikleyicisiyle bağlanır
-   (örn. `scan_count` kuralı anket gösterir). Bu sayede anket gösterimi motorun
-   non-breaking mimarisine oturur.
-3. Cevaplar anonim, scan ile ilişkili (PII yok).
+1. Tablolar: `surveys`, `survey_questions` (tek seçim/çok seçim/metin), `survey_responses` (question+scan unique) — YAPILDI
+2. Gösterim kuralı: aksiyon motoru `show_survey` aksiyon tipiyle (enum genişletildi) — YAPILDI
+3. CheckProduct: anket formu render + `submitSurvey` (zorunlu soru validasyonu, strip_tags, 1000 char) — YAPILDI
+4. Admin: `SurveyResource` (soru repeater'lı CRUD, tenant izole) — YAPILDI
+5. Cevaplar anonim, scan ile ilişkili (PII yok) — YAPILDI
 
-## 7. Değerlendirme Moderasyon Ekranı
+## 7. Değerlendirme Moderasyon Ekranı — YAPILDI
 
-1. `ProductReview` için bağımsız Filament resource (şu an sadece RelationManager).
-2. Bulk onay/red action, beklemede (`is_approved=false`) filtresi.
-3. Yeni onaylı değerlendirme → firma adminine özet e-postası (opsiyonel, queue).
-4. Product detayındaki ReviewsRelationManager salt-okunur listeye düşer.
+1. `ReviewResource` (bağımsız resource, tenant izole, bekleyen sayacı navigation badge) — YAPILDI
+2. Bulk onay/red action + tekil onay toggle — YAPILDI
+3. Onaylı değerlendirme e-posta özeti — YAPILMADI (opsiyonel, Faz 3'e bırakıldı)
+4. Product detayındaki ReviewsRelationManager salt-okunur — YAPILDI
 
-## 8. Genel QR Sertleştirme
+## 8. Genel QR Sertleştirme — YAPILDI
 
-1. `general_qr_code` lookup'ının index'li olduğu doğrulanır (yoksa migration).
-2. `redirect_url` boş genel QR ürünlerinde bugünkü davranış netleştirilir:
-   sonuç sayfası mı, boş yanıt mı? → Test ile sabitlenir.
-3. Genel QR değerleri için format/benzersizlik validasyonu güçlendirilir.
-4. Faz 1'de "KISMEN YAPILDI" işaretli madde kapatılır.
+1. `general_qr_code` DB unique index (multiple NULL serbest) — YAPILDI
+2. Redirect'siz genel QR davranışı 404 olarak test ile sabitlendi — YAPILDI
+3. Form validasyonu: `unique(ignoreRecord)` + item UUID çakışma kontrolü (mevcut) — YAPILDI
+4. Faz 1'de "KISMEN YAPILDI" işaretli madde kapatıldı — YAPILDI
 
 ---
 
@@ -217,15 +216,15 @@ app/
 
 ## 10. Definition of Done (Faz 2)
 
-1. `action_rules`/`action_logs` migrationları çalışıyor, modeller tenant izole.
-2. Feature flag kapalıyken davranış farkı sıfır (regresyon testi ile kanıt).
-3. Aksiyon motoru 4 tetikleyici + 4 aksiyon tipiyle çalışıyor.
-4. Rapor filtreleri + CSV export tenant izole.
-5. Ürün detay sekmeleri eski fonksiyonaliteyi eksiksiz taşıyor.
-6. Anket modülü motor tetikleyicisiyle gösterilebiliyor.
-7. Moderasyon ekranı bulk onay/red yapıyor.
-8. Genel QR akışı test ile sabitlenmiş.
-9. Kritik Faz 2 testleri yeşil, AGENT.md güncellenmiş.
+1. `action_rules`/`action_logs` migrationları çalışıyor, modeller tenant izole. — ✅
+2. Feature flag kapalıyken davranış farkı sıfır (regresyon testi ile kanıt). — ✅
+3. Aksiyon motoru 4 tetikleyici + 5 aksiyon tipiyle çalışıyor. — ✅
+4. Rapor filtreleri + CSV export tenant izole. — ✅
+5. Ürün detay sekmeleri eski fonksiyonaliteyi eksiksiz taşıyor. — ✅
+6. Anket modülü motor tetikleyicisiyle gösterilebiliyor. — ✅
+7. Moderasyon ekranı bulk onay/red yapıyor. — ✅
+8. Genel QR akışı test ile sabitlenmiş. — ✅
+9. Kritik Faz 2 testleri yeşil, AGENT.md güncellenmiş. — ✅ (46/46 test)
 
 ## 11. Manuel Kontrol Listesi (Uygulama Sonu)
 

@@ -34,7 +34,7 @@ app/
 │   ├── ActionExecuted.php                   # Kural yürütülünce fırlatılır (payload ile)
 │   └── ScanRecorded.php                     # Scan oluşunca fırlatılır (aksiyon motoru girişi)
 ├── Filament/
-│   ├── Resources/                           # 12 resource (her biri → Form/Table/Pages)
+│   ├── Resources/                           # 14 resource (her biri → Form/Table/Pages)
 │   │   ├── ActionRules/                     # Aksiyon kuralı CRUD + flag toggle (super admin)
 │   │   ├── Batches/
 │   │   ├── Categories/
@@ -48,9 +48,13 @@ app/
 │   │   ├── Products/
 │   │   │   └── RelationManagers/
 │   │   │       ├── BatchesRelationManager.php    # Ürünün partileri
-│   │   │       └── ReviewsRelationManager.php    # Değerlendirme yönetimi (onay/red)
+│   │   │       ├── ScansRelationManager.php      # Ürünün taramaları (custom Builder)
+│   │   │       ├── DocumentsRelationManager.php  # Ürün belgeleri (indirme linkli)
+│   │   │       └── ReviewsRelationManager.php    # Değerlendirme listesi (salt-okunur)
+│   │   ├── Reviews/                         # Değerlendirme moderasyonu (bulk onay/red, bekleyen sayacı badge)
 │   │   ├── Scans/
 │   │   ├── Settings/
+│   │   ├── Surveys/                         # Anket CRUD (soru repeater: tek seçim/çok seçim/metin)
 │   │   └── Users/
 │   └── Widgets/                             # Dashboard widgetları:
 │       ├── AccountWidget.php
@@ -60,6 +64,7 @@ app/
 │       ├── ScanHistoryWidget.php
 │       ├── ScanLocationWidget.php
 │       ├── ScansMapWidget.php
+│       ├── CategoryScansChart.php           # Son 30 gün kategori kırılımı (bar)
 │       └── TopScannedItemsWidget.php
 ├── Helpers/SettingHelper.php                # Site ayarları cache helper
 ├── Http/
@@ -77,8 +82,9 @@ app/
 │   └── CompanySwitcher.php                  # Sidebar'da alt firma seçici
 ├── Models/                                  # Company, Product, ProductDocument,
 │                                            # ProductReview, Batch, Item, Scan,
-│                                            # ActionRule, ActionLog, Category, Post,
-│                                            # Page, Partner, Setting, User
+│                                            # ActionRule, ActionLog, Survey,
+│                                            # SurveyQuestion, SurveyResponse,
+│                                            # Category, Post, Page, Partner, Setting, User
 ├── Policies/RolePolicy.php                  # Role bazlı policy
 ├── Providers/
 │   ├── AppServiceProvider.php
@@ -88,7 +94,7 @@ app/
 │   ├── ScanContext.php                      # Scan/item/product bağlamı + tarama sayacı
 │   ├── Contracts/                           # ITrigger + IAction arayüzleri
 │   ├── Triggers/                            # ScanCount | FirstScan | DateRange | ItemRevisit
-│   └── Actions/                             # ShowContent | Redirect | Webhook | NotifyAdmin
+│   └── Actions/                             # ShowContent | Redirect | Webhook | NotifyAdmin | ShowSurvey
 └── Traits/HasTranslations.php               # Çoklu dil trait'i
 
 config/
@@ -97,7 +103,7 @@ config/
 └── permission.php                            # Spatie Permission ayarları
 
 database/
-├── migrations/                               # 27 migration
+├── migrations/                               # 32 migration
 ├── factories/                               # Company, Product, Category, User factory
 └── seeders/DatabaseSeeder.php               # Demo veri + roller
 
@@ -138,7 +144,7 @@ tests/
 - `digital_content_type`: pdf | youtube | file
 - `digital_file_path`, `expiration_date`, `serial_number`
 - `qr_mode`: unique | general
-- `general_qr_code`: nullable, sadece `qr_mode=general` iken dolu
+- `general_qr_code`: nullable, sadece `qr_mode=general` iken dolu, **DB seviyesinde unique** (multiple NULL serbest)
 - `redirect_url`: nullable, her iki modda da kullanılabilir — QR okutulduğunda tarama kaydı düşüldükten sonra kullanıcı bu URL'e (en fazla 2 sn içinde) yönlendirilir; genel QR ürünlerinde anında yönlendirilir (item/scan kaydı yok)
 - Sosyal medya: `whatsapp`, `instagram`, `facebook`, `twitter`, `youtube`, `website`, `email`
 - Validasyon: category_id aynı company'e ait olmalı
@@ -168,10 +174,17 @@ tests/
 - Mimar: `Scan::created` → `ScanRecorded` event → `EvaluateActionRules` listener (try/catch'li, flag kapalıyken no-op)
 - **ActionEngine akışı:** kural seçimi (product'ın + firma geneli, priority sıralı) → trigger değerlendirme (eşleşmezse log yok) → limit/pencere kontrolü (bloklanırsa `skipped` log) → dedup → aksiyon yürütme → `success`/`failed` log + `times_executed` artışı + `ActionExecuted` event
 - Trigger'lar (`app/Services/ActionEngine/Triggers/`): scan_count (item/product/company kapsamı), first_scan, date_range, item_revisit (after_days)
-- Aksiyonlar (`app/Services/ActionEngine/Actions/`): show_content (check sayfasına içerik), redirect (URL validasyonlu), webhook (HMAC imzalı queue job), notify_admin (queue e-posta)
+- Aksiyonlar (`app/Services/ActionEngine/Actions/`): show_content (check sayfasına içerik), redirect (URL validasyonlu), webhook (HMAC imzalı queue job), notify_admin (queue e-posta), show_survey (anket göster)
 - **Filament:** `ActionRuleResource` (Ürün Yönetimi grubu; tenant izolasyonlu, `config.*`/`payload.*` alanları kayıtta `trigger_config`/`action_payload`'a birleşir). ListActionRules sayfasında super admin için **flag toggle** header action (`action_engine_enabled` Setting + cache clear)
-- **CheckProduct entegrasyonu:** scan kaydı sonrası o scan'in `success` log'ları okunur; `show_content` → banner (blade otomatik escape, string veya {tr,en} array destekler), `redirect` → ürünün kendi `redirect_url`'i yoksa kural URL'i kullanılır (ikisi asla birlikte tetiklenmez)
+- **CheckProduct entegrasyonu:** scan kaydı sonrası o scan'in `success` log'ları okunur; `show_content` → banner (blade otomatik escape, string veya {tr,en} array destekler), `redirect` → ürünün kendi `redirect_url`'i yoksa kural URL'i kullanılır (ikisi asla birlikte tetiklenmez), `show_survey` → anket formu render edilir
 - **Sistem etkisi sıfır:** motor hatası scan kaydını ve check akışını etkilemez (her kural kendi try/catch'inde)
+
+### `surveys` / `survey_questions` / `survey_responses` — Anket modülü (Faz 2)
+- Anket: `company_id`, `product_id` (nullable=firma geneli), `name`, `is_active`
+- Soru: `type` (single | multiple | text), `label` (JSON translatable), `options` (JSON array), `is_required`, `sort_order`
+- Cevap: `question_id + scan_id` unique (tek scan tek cevap), `value` (text; çok seçim JSON array, strip_tags + 1000 karakter sınırı)
+- Gösterim: yalnızca aksiyon motoru `show_survey` kuralı tetiklenince (scan sonrası); zorunlu soru boşsa gönderim engellenir
+- Admin: `SurveyResource` (soru repeater'lı CRUD) + anket cevapları DB'de analiz için birikir
 
 ### `posts` / `pages` / `settings` — Dinamik içerik (translatable)
 - JSON translatable alanlar: `title`, `slug`, `content` / `value`
@@ -270,6 +283,9 @@ php artisan config:clear --ansi && php artisan test
 - `ActionEngineFailSafeTest` — webhook hatası loglanır, flag kapalı no-op, geçersiz redirect failed
 - `ActionRuleTenantIsolationTest` — kural CRUD tenant izolasyonu (list + canView/canEdit/canDelete)
 - `ActionEngineRenderTest` — show_content banner + redirect önceliği (ürün redirect > kural) + flag kapalı banner yok
+- `SurveyActionTest` — anket render, cevap kaydı (scan başına tek), zorunlu soru validasyonu, geçersiz payload failed
+- `ProductDetailTabsTest` — ViewProduct sekmeleri + ScansRelationManager ürün kapsamı + tenant 403
+- `GeneralQrHardeningTest` — genel QR unique index, çoklu NULL serbest, redirect'siz genel QR 404
 
 ---
 
