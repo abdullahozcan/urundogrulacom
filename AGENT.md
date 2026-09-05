@@ -31,6 +31,7 @@
 app/
 ├── Console/Commands/GrantSuperAdmin.php    # CLI: kullanıcıyı super admin yap
 ├── Events/
+│   ├── ActionExecuted.php                   # Kural yürütülünce fırlatılır (payload ile)
 │   └── ScanRecorded.php                     # Scan oluşunca fırlatılır (aksiyon motoru girişi)
 ├── Filament/
 │   ├── Resources/                           # 11 resource (her biri → Form/Table/Pages)
@@ -67,6 +68,9 @@ app/
 │   └── Middleware/SetLocale.php             # Dil middleware
 ├── Listeners/
 │   └── EvaluateActionRules.php              # ScanRecorded → aksiyon motoru (fail-safe, feature flag'li)
+├── Jobs/
+│   ├── ExecuteWebhookAction.php             # Webhook POST (HMAC imzalı, tries=3, backoff)
+│   └── SendNotifyAdminAction.php            # Admin bildirim e-postası (tries=3)
 ├── Livewire/
 │   ├── CheckProduct.php                     # Public QR sorgulama + değerlendirme + redirect
 │   └── CompanySwitcher.php                  # Sidebar'da alt firma seçici
@@ -78,6 +82,12 @@ app/
 ├── Providers/
 │   ├── AppServiceProvider.php
 │   └── Filament/AdminPanelProvider.php
+├── Services/ActionEngine/
+│   ├── ActionEngine.php                     # Kural eşleme + dedup + yürütme + loglama
+│   ├── ScanContext.php                      # Scan/item/product bağlamı + tarama sayacı
+│   ├── Contracts/                           # ITrigger + IAction arayüzleri
+│   ├── Triggers/                            # ScanCount | FirstScan | DateRange | ItemRevisit
+│   └── Actions/                             # ShowContent | Redirect | Webhook | NotifyAdmin
 └── Traits/HasTranslations.php               # Çoklu dil trait'i
 
 config/
@@ -151,11 +161,14 @@ tests/
 - `cookie_token`: tek cihaz tek oy (unique: `product_id + cookie_token`)
 - `is_approved`: admin onayı gerekir (default false)
 
-### `action_rules` / `action_logs` — Aksiyon motoru (Faz 2, flag ile açılır)
+### `action_rules` / `action_logs` — Aksiyon motoru (Faz 2, `action_engine_enabled` flag'i ile açılır)
 - Kural: `company_id`, `product_id` (nullable=firma geneli), `trigger_type` (scan_count | first_scan | date_range | item_revisit), `trigger_config` (JSON), `action_type` (show_content | redirect | webhook | notify_admin), `action_payload` (JSON), `priority`, `max_executions`, zaman penceresi
 - Log: `action_rule_id` + `scan_id` unique (dedup), `result`: success | failed | skipped
-- Mimar: `Scan::created` → `ScanRecorded` event → `EvaluateActionRules` listener (try/catch'li, `action_engine_enabled` settings flag'i kapalıyken no-op). Motor: `app/Services/ActionEngine/ActionEngine.php`
-- **Sistem etkisi sıfır:** motor hatası scan kaydını ve check akışını etkilemez
+- Mimar: `Scan::created` → `ScanRecorded` event → `EvaluateActionRules` listener (try/catch'li, flag kapalıyken no-op)
+- **ActionEngine akışı:** kural seçimi (product'ın + firma geneli, priority sıralı) → trigger değerlendirme (eşleşmezse log yok) → limit/pencere kontrolü (bloklanırsa `skipped` log) → dedup → aksiyon yürütme → `success`/`failed` log + `times_executed` artışı + `ActionExecuted` event
+- Trigger'lar (`app/Services/ActionEngine/Triggers/`): scan_count (item/product/company kapsamı), first_scan, date_range, item_revisit (after_days)
+- Aksiyonlar (`app/Services/ActionEngine/Actions/`): show_content (check sayfasına içerik), redirect (URL validasyonlu), webhook (HMAC imzalı queue job), notify_admin (queue e-posta)
+- **Sistem etkisi sıfır:** motor hatası scan kaydını ve check akışını etkilemez (her kural kendi try/catch'inde)
 
 ### `posts` / `pages` / `settings` — Dinamik içerik (translatable)
 - JSON translatable alanlar: `title`, `slug`, `content` / `value`
@@ -249,6 +262,9 @@ php artisan config:clear --ansi && php artisan test
 - `CrossTenantAssignmentTest` — farklı şirket kategorisi atama reddi
 - `NavigationVisibilityTest` — super admin vs company admin menü (Company+User artık company admin'e de açık)
 - `SubCompanyIsolationTest` — parent'ın child verilerini görebildiği, child'ın parent'ı göremediği, sibling'lerin birbirini görmediği doğrulanır
+- `ActionRuleTriggerTest` — 4 tetikleyici tipi + limit + zaman penceresi davranışı
+- `ActionEngineDedupTest` — aynı scan için çift yürütme engeli + firma geneli kuralı
+- `ActionEngineFailSafeTest` — webhook hatası loglanır, flag kapalı no-op, geçersiz redirect failed
 
 ---
 

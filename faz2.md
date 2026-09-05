@@ -144,15 +144,15 @@ app/
 
 ### 3.5 Yol Haritası (Uygulama Sırası)
 
-1. Migration: `create_action_rules_table` + `create_action_logs_table`
-2. Model: `ActionRule`, `ActionLog` (+ tenant helper'lar)
-3. `ScanRecorded` event + `EvaluateActionRules` listener (flag kapalı no-op)
-4. `ActionEngine` + Trigger sınıfları + `ActionLogs` dedup
-5. Action sınıfları: `ShowContent` → `NotifyAdmin` → `Redirect` → `Webhook` (risk sırasıyla)
-6. Filament: `ActionRuleResource` (tenant izolasyonlu, öncelik + limit alanları)
-7. CheckProduct render entegrasyonu (koşullu blok, sanitize)
-8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon
-9. Pilot: tek demo firmada flag açma
+1. Migration: `create_action_rules_table` + `create_action_logs_table` — YAPILDI
+2. Model: `ActionRule`, `ActionLog` (+ tenant helper'lar) — YAPILDI
+3. `ScanRecorded` event + `EvaluateActionRules` listener (flag kapalı no-op) — YAPILDI
+4. `ActionEngine` + Trigger sınıfları + `ActionLogs` dedup — YAPILDI
+5. Action sınıfları: `ShowContent` → `NotifyAdmin` → `Redirect` → `Webhook` (risk sırasıyla) — YAPILDI
+6. Filament: `ActionRuleResource` (tenant izolasyonlu, öncelik + limit alanları) — BEKLİYOR
+7. CheckProduct render entegrasyonu (koşullu blok, sanitize) — BEKLİYOR
+8. Testler (aşağıda) + smoke test, flag kapalıyken regresyon — KISMEN (trigger/dedup/fail-safe testleri yazıldı)
+9. Pilot: tek demo firmada flag açma — BEKLİYOR
 
 ### 3.6 Aksiyon Motoru Kabul Kriterleri
 
