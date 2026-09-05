@@ -59,6 +59,7 @@ class ProductsTable
                 //
             ])
             ->recordActions([
+                \Filament\Actions\ViewAction::make(),
                 EditAction::make(),
                 Action::make('qr_png')
                     ->label('QR İndir (PNG)')
