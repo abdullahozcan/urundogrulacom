@@ -288,6 +288,58 @@
         </aside>
     </div>
 
+    {{-- Survey Section (Action Engine) --}}
+    @if($scanSaved && $survey && !$surveySubmitted)
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-surface-ice border-b border-deep-navy/5 flex items-center justify-between">
+                <h2 class="font-semibold text-deep-navy flex items-center gap-2">
+                    <span class="material-symbols-outlined text-trust-blue">poll</span>
+                    {{ $survey->name }}
+                </h2>
+            </div>
+            <form wire:submit="submitSurvey" class="p-6 space-y-5">
+                @foreach($survey->questions as $question)
+                    <div>
+                        <label class="block text-sm font-semibold text-deep-navy mb-2">
+                            {{ $question->getLabel() }}
+                            @if($question->is_required)<span class="text-status-error">*</span>@endif
+                        </label>
+                        @if($question->type === 'text')
+                            <input type="text"
+                                   wire:model="surveyAnswers.{{ $question->id }}"
+                                   class="w-full rounded-xl border border-deep-navy/10 focus:border-trust-blue focus:ring-trust-blue text-sm px-4 py-3"
+                                   maxlength="500">
+                        @else
+                            <div class="space-y-2">
+                                @foreach($question->getOptions() as $option)
+                                    <label class="flex items-center gap-2 text-sm text-on-surface cursor-pointer hover:text-trust-blue">
+                                        <input type="{{ $question->type === 'multiple' ? 'checkbox' : 'radio' }}"
+                                               wire:model="surveyAnswers.{{ $question->id }}"
+                                               value="{{ $option }}"
+                                               class="accent-trust-blue w-4 h-4">
+                                        {{ $option }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+                        @error("surveyAnswers.{$question->id}") <p class="text-sm text-status-error mt-1">{{ $message }}</p> @enderror
+                    </div>
+                @endforeach
+                <button type="submit"
+                        class="px-5 py-2.5 bg-trust-blue text-white font-semibold rounded-lg hover:opacity-90 transition-all text-sm">
+                    Anketi Gönder
+                </button>
+            </form>
+        </div>
+    @elseif($scanSaved && $survey && $surveySubmitted)
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 text-sm text-success-green font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined">check_circle</span>
+                Anket yanıtlarınız için teşekkürler.
+            </div>
+        </div>
+    @endif
+
     {{-- Review Section --}}
     <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 bg-surface-ice border-b border-deep-navy/5 flex items-center justify-between">

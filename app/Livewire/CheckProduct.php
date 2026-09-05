@@ -8,6 +8,8 @@ use App\Models\Item;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\Scan;
+use App\Models\Survey;
+use App\Models\SurveyResponse;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -21,6 +23,11 @@ class CheckProduct extends Component
     public $redirectUrl = null;
     public $scanRedirected = false;
     public $actionContent = null;
+
+    public $survey = null;
+    public $surveyAnswers = [];
+    public $surveySubmitted = false;
+    public $lastScanId = null;
 
     public $deviceToken = '';
     public $existingReview = null;
@@ -106,6 +113,7 @@ class CheckProduct extends Component
 
         $this->item->update(['is_scanned' => true]);
         $this->scanSaved = true;
+        $this->lastScanId = $scan->id;
 
         $this->loadActionResults($scan->id);
 
@@ -125,6 +133,7 @@ class CheckProduct extends Component
                 $query->whereIn('action_type', [
                     ActionRule::ACTION_SHOW_CONTENT,
                     ActionRule::ACTION_REDIRECT,
+                    ActionRule::ACTION_SHOW_SURVEY,
                 ]);
             })
             ->with('rule')
@@ -152,8 +161,61 @@ class CheckProduct extends Component
                 if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
                     $this->redirectUrl = $url;
                 }
+            } elseif ($rule->action_type === ActionRule::ACTION_SHOW_SURVEY) {
+                $surveyId = $rule->action_payload['survey_id'] ?? null;
+
+                if ($surveyId && !$this->survey) {
+                    $this->survey = Survey::query()
+                        ->where('company_id', $rule->company_id)
+                        ->where('is_active', true)
+                        ->with('questions')
+                        ->find($surveyId);
+                }
             }
         }
+    }
+
+    public function submitSurvey()
+    {
+        if (!$this->survey || !$this->lastScanId || $this->surveySubmitted) {
+            return;
+        }
+
+        foreach ($this->survey->questions as $question) {
+            $answer = $this->surveyAnswers[$question->id] ?? null;
+
+            $isEmpty = $answer === null || $answer === '' || (is_array($answer) && empty($answer));
+
+            if ($question->is_required && $isEmpty) {
+                $this->addError("surveyAnswers.{$question->id}", 'Bu soru zorunludur.');
+                return;
+            }
+        }
+
+        foreach ($this->survey->questions as $question) {
+            $answer = $this->surveyAnswers[$question->id] ?? null;
+
+            if ($answer === null || $answer === '' || (is_array($answer) && empty($answer))) {
+                continue;
+            }
+
+            $value = is_array($answer)
+                ? json_encode(array_map(fn ($item) => strip_tags(trim((string) $item)), array_slice($answer, 0, 10)), JSON_UNESCAPED_UNICODE)
+                : strip_tags(trim((string) $answer));
+
+            SurveyResponse::updateOrCreate(
+                [
+                    'question_id' => $question->id,
+                    'scan_id' => $this->lastScanId,
+                ],
+                [
+                    'survey_id' => $this->survey->id,
+                    'value' => mb_substr($value, 0, 1000),
+                ]
+            );
+        }
+
+        $this->surveySubmitted = true;
     }
 
     private function resolveLocaleValue($value)

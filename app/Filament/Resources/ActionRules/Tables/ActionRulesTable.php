@@ -47,6 +47,7 @@ class ActionRulesTable
                         ActionRule::ACTION_REDIRECT => 'warning',
                         ActionRule::ACTION_WEBHOOK => 'gray',
                         ActionRule::ACTION_NOTIFY_ADMIN => 'success',
+                        ActionRule::ACTION_SHOW_SURVEY => 'purple',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -54,6 +55,7 @@ class ActionRulesTable
                         ActionRule::ACTION_REDIRECT => 'Yönlendir',
                         ActionRule::ACTION_WEBHOOK => 'Webhook',
                         ActionRule::ACTION_NOTIFY_ADMIN => 'Bildirim',
+                        ActionRule::ACTION_SHOW_SURVEY => 'Anket',
                         default => $state,
                     }),
                 TextColumn::make('priority')

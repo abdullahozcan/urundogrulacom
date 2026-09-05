@@ -9,6 +9,7 @@ use App\Models\Scan;
 use App\Services\ActionEngine\Actions\NotifyAdminAction;
 use App\Services\ActionEngine\Actions\RedirectAction;
 use App\Services\ActionEngine\Actions\ShowContentAction;
+use App\Services\ActionEngine\Actions\ShowSurveyAction;
 use App\Services\ActionEngine\Actions\WebhookAction;
 use App\Services\ActionEngine\Contracts\IAction;
 use App\Services\ActionEngine\Contracts\ITrigger;
@@ -149,6 +150,7 @@ class ActionEngine
             ActionRule::ACTION_REDIRECT => new RedirectAction(),
             ActionRule::ACTION_WEBHOOK => new WebhookAction(),
             ActionRule::ACTION_NOTIFY_ADMIN => new NotifyAdminAction(),
+            ActionRule::ACTION_SHOW_SURVEY => new ShowSurveyAction(),
             default => null,
         };
     }

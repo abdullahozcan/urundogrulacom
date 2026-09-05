@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ActionRules\Schemas;
 
 use App\Models\ActionRule;
+use App\Models\Survey;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -91,10 +92,29 @@ class ActionRuleForm
                         ActionRule::ACTION_REDIRECT => 'Yönlendir',
                         ActionRule::ACTION_WEBHOOK => 'Webhook çağır',
                         ActionRule::ACTION_NOTIFY_ADMIN => 'Yöneticiye bildir',
+                        ActionRule::ACTION_SHOW_SURVEY => 'Anket göster',
                     ])
                     ->live()
                     ->default(ActionRule::ACTION_SHOW_CONTENT)
                     ->required(),
+                Select::make('payload.survey_id')
+                    ->label('Anket')
+                    ->options(function ($get) {
+                        $companyId = $get('company_id') ?? auth()->user()?->getActiveCompanyId();
+
+                        if (!$companyId) {
+                            return [];
+                        }
+
+                        return Survey::query()
+                            ->where('company_id', $companyId)
+                            ->where('is_active', true)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->visible(fn ($get) => $get('action_type') === ActionRule::ACTION_SHOW_SURVEY)
+                    ->required(fn ($get) => $get('action_type') === ActionRule::ACTION_SHOW_SURVEY),
                 TextInput::make('payload.title')
                     ->label('Başlık')
                     ->maxLength(255)

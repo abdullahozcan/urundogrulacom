@@ -20,6 +20,7 @@ class ActionRule extends Model
     public const ACTION_REDIRECT = 'redirect';
     public const ACTION_WEBHOOK = 'webhook';
     public const ACTION_NOTIFY_ADMIN = 'notify_admin';
+    public const ACTION_SHOW_SURVEY = 'show_survey';
 
     protected $fillable = [
         'company_id',
