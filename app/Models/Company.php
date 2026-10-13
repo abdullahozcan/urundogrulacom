@@ -49,10 +49,10 @@ class Company extends Model
 
     public function accessibleCompanyIds(): array
     {
-        return array_merge(
+        return array_values(array_map('intval', array_merge(
             [$this->id],
             $this->children()->pluck('id')->toArray()
-        );
+        )));
     }
 
     public function canCreateSubCompany(): bool
@@ -66,5 +66,14 @@ class Company extends Model
         }
 
         return $this->children()->count() < $this->max_sub_companies;
+    }
+
+    /**
+     * Hiyerarşi yalnızca bir katman derinliğinde tutulur: bir üst firma
+     * alt firma, alt firma torun firma oluşturamaz.
+     */
+    public function isRoot(): bool
+    {
+        return is_null($this->parent_id);
     }
 }

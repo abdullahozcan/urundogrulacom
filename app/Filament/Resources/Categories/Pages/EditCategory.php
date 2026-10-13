@@ -22,7 +22,9 @@ class EditCategory extends EditRecord
         $user = auth()->user();
 
         if ($user && !$user->isSuperAdmin()) {
-            $data['company_id'] = $user->company_id;
+            // Keep ownership stable: the editor may legitimately reach a child
+            // tenant's record, but saving must not re-home it to the parent.
+            $data['company_id'] = $this->record->company_id;
         }
 
         return $data;

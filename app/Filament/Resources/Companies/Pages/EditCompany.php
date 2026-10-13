@@ -14,7 +14,25 @@ class EditCompany extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->visible(fn (): bool => auth()->user()->isSuperAdmin() || $this->record->id !== auth()->user()->getActiveCompanyId()),
+                // Compared against `company_id`, never against the
+                // session-derived active company: a root admin can point the
+                // switcher at a child, which would otherwise unlock
+                // deleting their own tenant root.
+                ->visible(fn (): bool => (bool) auth()->user()?->isSuperAdmin()),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $user = auth()->user();
+
+        // The quota and the hierarchy link are super-admin only. The fields are
+        // hidden from the form for everyone else, but hidden is a UI hint and
+        // a crafted request can still carry them.
+        if ($user && !$user->isSuperAdmin()) {
+            unset($data['max_sub_companies'], $data['parent_id']);
+        }
+
+        return $data;
     }
 }

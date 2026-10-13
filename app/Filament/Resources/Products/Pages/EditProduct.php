@@ -43,7 +43,11 @@ class EditProduct extends EditRecord
         $user = auth()->user();
 
         if ($user && !$user->isSuperAdmin()) {
-            $data['company_id'] = $user->company_id;
+            // Ownership must never change on edit. These resources list the
+            // editor's own company *plus* its children, so rewriting
+            // `company_id` here silently re-homed a child tenant's record
+            // (and its category link, documents and reviews) to the parent.
+            $data['company_id'] = $this->record->company_id;
         }
 
         if (($data['qr_mode'] ?? 'unique') !== 'general') {

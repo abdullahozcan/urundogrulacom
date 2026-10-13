@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Partners\Schemas;
 
+use App\Helpers\UploadRules;
 use Filament\Schemas\Schema;
 
 class PartnerForm
@@ -13,11 +14,12 @@ class PartnerForm
                 \Filament\Forms\Components\TextInput::make('name')
                     ->label('Firma / Partner Adı')
                     ->maxLength(255),
-                \Filament\Forms\Components\FileUpload::make('logo')
-                    ->label('Firma Logosu')
-                    ->image()
-                    ->disk('public')
-                    ->directory('partners')
+                UploadRules::hardenImage(
+                    \Filament\Forms\Components\FileUpload::make('logo')
+                        ->label('Firma Logosu')
+                        ->directory('partners')
+                        ->disk('public'),
+                )
                     ->required()
                     ->columnSpanFull(),
                 \Filament\Forms\Components\Toggle::make('is_active')

@@ -40,7 +40,19 @@ class CategoryForm
                             return;
                         }
 
-                        $query->whereIn('company_id', $user->getAccessibleCompanyIds())->whereNull('parent_id');
+                        // Must be scoped to the *same* company as the category
+                        // being edited, not merely to "any accessible
+                        // company", otherwise a parent admin can graft a child
+                        // company's root category under its own tree and pull
+                        // foreign category names into this tenant's screens.
+                        $companyId = auth()->user()?->getActiveCompanyId();
+
+                        if (!$companyId) {
+                            $query->whereRaw('0 = 1');
+                            return;
+                        }
+
+                        $query->where('company_id', $companyId)->whereNull('parent_id');
                     })
                     ->searchable()
                     ->preload(),

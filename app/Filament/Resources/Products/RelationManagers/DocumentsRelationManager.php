@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
+use App\Filament\Resources\Products\ProductResource;
+use App\Models\ProductDocument;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -45,7 +47,13 @@ class DocumentsRelationManager extends RelationManager
                 \Filament\Actions\Action::make('download')
                     ->label('İndir')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn ($record) => \Storage::url($record->file_path), shouldOpenInNewTab: true),
+                    // Not a raw Storage::url(): documents live on a private
+                    // disk and are only reachable through the signed route.
+                    ->authorize(fn (ProductDocument $record): bool => ProductResource::canEdit($record->product))
+                    ->url(fn (ProductDocument $record): string => \App\Http\Controllers\PublicAssetController::signedUrl(
+                        'assets.document',
+                        ['document' => $record->getKey()],
+                    ), shouldOpenInNewTab: true),
             ]);
     }
 }

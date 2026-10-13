@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Helpers\UploadRules;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -34,11 +35,12 @@ class PostForm
                 \Filament\Schemas\Components\Tabs::make('Translations')
                     ->tabs($tabs)
                     ->columnSpanFull(),
-                FileUpload::make('image')
-                    ->image()
-                    ->disk('public')
-                    ->directory('blog')
-                    ->columnSpanFull(),
+                UploadRules::hardenImage(
+                    FileUpload::make('image')
+                        ->label('Kapak Görseli')
+                        ->directory('blog')
+                        ->disk('public'),
+                )->columnSpanFull(),
                 Toggle::make('is_published')
                     ->label('Yayınlandı mı?')
                     ->default(false),

@@ -30,7 +30,8 @@ class EditActionRule extends EditRecord
         $user = auth()->user();
 
         if ($user && !$user->isSuperAdmin()) {
-            $data['company_id'] = $user->company_id;
+            // Keep ownership stable; see EditCategory for the rationale.
+            $data['company_id'] = $this->record->company_id;
         }
 
         $data['trigger_config'] = $data['config'] ?? null;

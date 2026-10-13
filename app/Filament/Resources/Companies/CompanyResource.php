@@ -95,6 +95,104 @@ class CompanyResource extends Resource
         });
     }
 
+    /**
+     * A root-company admin may read its own record and its children, and may
+     * manage its own children through the relation manager. Everything that
+     * would restructure the hierarchy (`max_sub_companies`, `parent_id`) is
+     * already hidden from the form for non super admins, and delete stays
+     * super-admin only so a tenant cannot orphan itself or its children.
+     */
+    public static function canCreate(): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $company = Company::find($user->company_id);
+
+        return $company && $company->isRoot();
+    }
+
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (!$user->company_id) {
+            return false;
+        }
+
+        return (int) $record->id === (int) $user->company_id
+            || (int) $record->parent_id === (int) $user->company_id;
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // A root company admin may edit only their own (root) record, which
+        // is what the children relation manager hangs off. Child records are
+        // managed from that relation manager, never as a standalone record.
+        return (int) $record->id === (int) $user->company_id
+            && is_null($record->parent_id);
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->isSuperAdmin()) {
+            return false;
+        }
+
+        // A root company must not be deletable from the panel: it would
+        // orphan every child company and user underneath it.
+        return !is_null($record->parent_id) || !$record->users()->exists();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::isSuperAdmin();
+    }
+
+    public static function canRestore(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return static::isSuperAdmin();
+    }
+
+    public static function canForceDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        $user = auth()->user();
+
+        return $user && $user->isSuperAdmin();
+    }
+
     public static function getRelations(): array
     {
         return [

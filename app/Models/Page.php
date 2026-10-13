@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitize;
 use Illuminate\Database\Eloquent\Model;
 
 class Page extends Model
@@ -23,4 +24,12 @@ class Page extends Model
         'content' => 'array',
         'is_published' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        // See Post::booted(): `content` is rendered raw on the public /p route.
+        static::saving(function (Page $page): void {
+            HtmlSanitize::sanitiseRawTranslatable($page, 'content');
+        });
+    }
 }

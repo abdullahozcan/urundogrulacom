@@ -91,6 +91,18 @@ class ReviewResource extends Resource
         return static::canView($record);
     }
 
+    /**
+     * Approving/rejecting a review mutates `is_approved` even though
+     * `canEdit()` is false, so it gets its own gate. Moderation is limited to
+     * super admins; tenant admins can read reviews and delete them.
+     */
+    public static function canModerate(): bool
+    {
+        $user = auth()->user();
+
+        return (bool) $user?->isSuperAdmin();
+    }
+
     public static function getPages(): array
     {
         return [

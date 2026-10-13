@@ -5,6 +5,7 @@ namespace App\Services\ActionEngine\Actions;
 use App\Models\ActionRule;
 use App\Services\ActionEngine\Contracts\IAction;
 use App\Services\ActionEngine\ScanContext;
+use App\Support\SafeUrl;
 use InvalidArgumentException;
 
 class RedirectAction implements IAction
@@ -13,8 +14,12 @@ class RedirectAction implements IAction
     {
         $url = $rule->action_payload['url'] ?? null;
 
-        if (! $url || ! filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new InvalidArgumentException("Invalid redirect URL for action rule [{$rule->id}]");
+        // Same gate as webhooks: `javascript:`, `data:` and internal hosts
+        // must never reach a public 302.
+        if (! SafeUrl::isSafe($url)) {
+            throw new InvalidArgumentException(
+                "Unsafe redirect URL for action rule [{$rule->id}]: " . (SafeUrl::violation($url) ?? 'invalid')
+            );
         }
 
         return ['redirect_url' => $url];

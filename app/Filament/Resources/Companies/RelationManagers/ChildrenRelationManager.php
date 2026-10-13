@@ -21,6 +21,16 @@ class ChildrenRelationManager extends RelationManager
         return false;
     }
 
+    /**
+     * A root company admin may manage its own children. Relation managers do
+     * not inherit the owner resource's authorization, so this is declared
+     * explicitly rather than assumed.
+     */
+    public static function canViewForRecord(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): bool
+    {
+        return CompanyResource::canView($ownerRecord);
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -41,10 +51,15 @@ class ChildrenRelationManager extends RelationManager
                     ->url(fn (): string => CompanyResource::getUrl('create', [
                         'parent_id' => $this->getOwnerRecord()->id,
                     ]))
-                    ->visible(fn () => $this->getOwnerRecord()->canCreateSubCompany()),
+                    ->authorize(fn (): bool => CompanyResource::canCreate()
+                        && $this->getOwnerRecord()->canCreateSubCompany())
+                    ->visible(fn (): bool => CompanyResource::canCreate()
+                        && $this->getOwnerRecord()->canCreateSubCompany()),
             ])
             ->recordActions([
                 EditAction::make()
+                    ->authorize(fn (\Illuminate\Database\Eloquent\Model $record): bool => CompanyResource::canView($record))
+                    ->visible(fn (\Illuminate\Database\Eloquent\Model $record): bool => CompanyResource::canView($record))
                     ->form([
                         TextInput::make('name')
                             ->required(),

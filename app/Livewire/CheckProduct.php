@@ -10,26 +10,52 @@ use App\Models\ProductReview;
 use App\Models\Scan;
 use App\Models\Survey;
 use App\Models\SurveyResponse;
+use App\Support\SafeUrl;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class CheckProduct extends Component
 {
     public $uuid;
+
+    /**
+     * Everything below is derived server side (or must not be client
+     * controlled) and is marked `#[Locked]`. Livewire signs the whole
+     * snapshot with an HMAC, but `#[Locked]` is the framework's own guarantee:
+     * without it, tampering with `lastScanId` or `scanSaved` becomes an
+     * authorization bypass the moment a code path trusts these directly.
+     */
+    #[Locked]
     public $item;
+
+    #[Locked]
     public $scanSaved = false;
+
+    #[Locked]
     public $redirectUrl = null;
+
+    #[Locked]
     public $scanRedirected = false;
+
+    #[Locked]
     public $actionContent = null;
 
+    #[Locked]
     public $survey = null;
+
     public $surveyAnswers = [];
     public $surveySubmitted = false;
+
+    #[Locked]
     public $lastScanId = null;
 
+    #[Locked]
     public $deviceToken = '';
+
     public $existingReview = null;
     public $rating = 5;
     public $comment = '';
@@ -54,7 +80,10 @@ class CheckProduct extends Component
                 ->where('general_qr_code', $uuid)
                 ->first();
 
-            if (!$generalProduct || !$generalProduct->redirect_url) {
+            // Previously this redirect had no validation at all, unlike the
+            // action-rule path. A stored bad value would turn the public
+            // /check route into an open redirector for the whole domain.
+            if (!$generalProduct || ! SafeUrl::isSafe($generalProduct->redirect_url)) {
                 abort(404, 'Product not found or invalid QR code.');
             }
 
@@ -63,7 +92,7 @@ class CheckProduct extends Component
 
         $product = $this->item->batch?->product;
 
-        if ($product && $product->redirect_url) {
+        if ($product && SafeUrl::isSafe($product->redirect_url)) {
             $this->redirectUrl = $product->redirect_url;
         }
 
@@ -83,6 +112,15 @@ class CheckProduct extends Component
         if ($this->scanSaved) {
             return;
         }
+
+        // This is a public Livewire action reachable by anyone holding a
+        // snapshot. Unthrottled it lets a bot flood the scans table and burn
+        // through every rule's execution budget (webhook amplification).
+        $key = 'check-scan:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 30)) {
+            return;
+        }
+        RateLimiter::hit($key, 60);
 
         $validated = validator(['lat' => $lat, 'lng' => $lng], [
             'lat' => 'required|numeric|between:-90,90',
@@ -158,7 +196,7 @@ class CheckProduct extends Component
             } elseif ($rule->action_type === ActionRule::ACTION_REDIRECT && !$this->redirectUrl) {
                 $url = $rule->action_payload['url'] ?? null;
 
-                if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
+                if ($url && SafeUrl::isSafe($url)) {
                     $this->redirectUrl = $url;
                 }
             } elseif ($rule->action_type === ActionRule::ACTION_SHOW_SURVEY) {
@@ -178,6 +216,18 @@ class CheckProduct extends Component
     public function submitSurvey()
     {
         if (!$this->survey || !$this->lastScanId || $this->surveySubmitted) {
+            return;
+        }
+
+        // Bind the scan to this component's item. `lastScanId` is server
+        // derived, but the ownership check makes the invariant explicit
+        // instead of implied by hydration.
+        $scan = Scan::query()
+            ->whereKey($this->lastScanId)
+            ->whereHas('item', fn ($query) => $query->where('id', $this->item->id))
+            ->first();
+
+        if (!$scan) {
             return;
         }
 
@@ -206,7 +256,7 @@ class CheckProduct extends Component
             SurveyResponse::updateOrCreate(
                 [
                     'question_id' => $question->id,
-                    'scan_id' => $this->lastScanId,
+                    'scan_id' => $scan->id,
                 ],
                 [
                     'survey_id' => $this->survey->id,
@@ -231,6 +281,14 @@ class CheckProduct extends Component
 
     public function submitReview()
     {
+        $key = 'check-review:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('comment', 'Çok fazla değerlendirme gönderdiniz. Lütfen biraz bekleyin.');
+
+            return;
+        }
+        RateLimiter::hit($key, 600);
+
         $this->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
@@ -238,6 +296,14 @@ class CheckProduct extends Component
 
         $productId = $this->item->batch->product_id;
         $cookieToken = hash('sha256', $this->deviceToken . '|' . $productId);
+
+        // The unique (product_id, cookie_token) index is the real dedupe, but
+        // a cleared cookie would otherwise just create another row.
+        if (ProductReview::where('product_id', $productId)->where('cookie_token', $cookieToken)->exists()) {
+            $this->reviewSaved = true;
+
+            return;
+        }
 
         ProductReview::create([
             'product_id' => $productId,

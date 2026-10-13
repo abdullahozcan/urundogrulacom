@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PublicAssetController;
 use App\Livewire\CheckProduct;
 
 Route::get('/locale/{lang}', function ($lang) {
@@ -18,6 +19,14 @@ Route::get('/', function () {
 });
 
 Route::get('/check/{uuid}', CheckProduct::class)->name('product.check');
+
+// Consumer-facing files (product documents, licensed digital content) live on
+// the private disk. These are the only routes that may read them, and each
+// requires a fresh temporary signature plus a non-expired product.
+Route::get('/assets/documents/{document}', [PublicAssetController::class, 'document'])
+    ->name('assets.document');
+Route::get('/assets/digital/{product}', [PublicAssetController::class, 'digitalContent'])
+    ->name('assets.digital');
 
 Route::get('/blog/{slug}', function ($slug) {
     $locales = array_keys(config('languages.supported', ['en' => 'English']));

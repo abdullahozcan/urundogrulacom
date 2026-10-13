@@ -87,6 +87,68 @@ class UserResource extends Resource
         return $query->whereIn('company_id', $user->getAccessibleCompanyIds());
     }
 
+    public static function canCreate(): bool
+    {
+        $user = auth()->user();
+
+        return $user && $user->isSuperAdmin();
+    }
+
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return static::recordBelongsToAccessibleCompany($record);
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return static::recordBelongsToAccessibleCompany($record);
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+
+        // Only a super admin may delete accounts. This keeps every
+        // company-scoped admin from being able to delete a peer.
+        return $user && $user->isSuperAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        $user = auth()->user();
+
+        return $user && $user->isSuperAdmin();
+    }
+
+    public static function canRestore(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canForceDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    protected static function recordBelongsToAccessibleCompany(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (!$user->company_id) {
+            return false;
+        }
+
+        return in_array((int) $record->company_id, $user->getAccessibleCompanyIds(), true);
+    }
+
     public static function getRelations(): array
     {
         return [

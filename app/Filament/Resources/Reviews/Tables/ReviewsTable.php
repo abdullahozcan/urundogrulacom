@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Reviews\Tables;
 
+use App\Filament\Resources\Reviews\ReviewResource;
 use App\Models\ProductReview;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -61,6 +62,12 @@ class ReviewsTable
                     ->icon(fn (ProductReview $record): string => $record->is_approved ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn (ProductReview $record): string => $record->is_approved ? 'warning' : 'success')
                     ->requiresConfirmation(false)
+                    // Custom actions are not auto-authorized by Filament.
+                    // `ReviewResource::canEdit()` is hard-coded false, yet
+                    // this mutates `is_approved`, so it needs its own gate:
+                    // moderation is a delete-class permission, not an edit.
+                    ->authorize(fn (): bool => ReviewResource::canModerate())
+                    ->visible(fn (): bool => ReviewResource::canModerate())
                     ->action(function (ProductReview $record): void {
                         $record->update(['is_approved' => !$record->is_approved]);
 
@@ -79,6 +86,8 @@ class ReviewsTable
                         ->color('success')
                         ->requiresConfirmation()
                         ->modalDescription('Seçilen değerlendirmeler onaylanacak. Devam edilsin mi?')
+                        ->authorize(fn (): bool => ReviewResource::canModerate())
+                        ->visible(fn (): bool => ReviewResource::canModerate())
                         ->action(function (Collection $records): void {
                             $records->each(fn (ProductReview $record) => $record->update(['is_approved' => true]));
 
@@ -93,6 +102,8 @@ class ReviewsTable
                         ->color('danger')
                         ->requiresConfirmation()
                         ->modalDescription('Seçilen değerlendirmelerin onayı kaldırılacak. Devam edilsin mi?')
+                        ->authorize(fn (): bool => ReviewResource::canModerate())
+                        ->visible(fn (): bool => ReviewResource::canModerate())
                         ->action(function (Collection $records): void {
                             $records->each(fn (ProductReview $record) => $record->update(['is_approved' => false]));
 

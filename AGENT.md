@@ -9,9 +9,9 @@
 | Teknoloji | Versiyon / Detay |
 |---|---|
 | PHP | ^8.3 |
-| Framework | Laravel ^13.0 |
-| Admin Panel | Filament 3.x (Shield ile yetkilendirme) |
-| Frontend | Livewire 3, Alpine.js, Tailwind CSS 4, Vite 8 |
+| Framework | Laravel ^13.0 (13.35) |
+| Admin Panel | Filament **5.x** (5.10) — Shield 4.3 ile yetkilendirme |
+| Frontend | Livewire **4.x**, Alpine.js, Tailwind CSS 4, Vite 8 |
 | Multi-Tenancy | Hiyerarşik (parent→child), 1 katman, `company_id` izolasyonu + `parent_id` |
 | Yetkilendirme | Spatie Laravel Permission + Filament Shield |
 | QR | simplesoftwareio/simple-qrcode |
@@ -66,12 +66,20 @@ app/
 │       ├── ScansMapWidget.php
 │       ├── CategoryScansChart.php           # Son 30 gün kategori kırılımı (bar)
 │       └── TopScannedItemsWidget.php
-├── Helpers/SettingHelper.php                # Site ayarları cache helper
+├── Helpers/
+│   ├── SettingHelper.php                    # Site ayarları cache helper
+│   └── UploadRules.php                      # Yükleme kuralları (MIME beyaz listesi, maxSize, resize/EXIF)
 ├── Http/
 │   ├── Controllers/
 │   │   ├── ContactController.php            # İletişim sayfası + form (throttle: 5 dk/10)
+│   │   ├── PublicAssetController.php        # İmzalı + süreli dosya servisi (belge / dijital içerik)
 │   │   └── QrDownloadController.php         # Item/ürün QR indirme (PNG/PDF/SVG)
-│   └── Middleware/SetLocale.php             # Dil middleware
+│   └── Middleware/
+│       ├── SetLocale.php                    # Dil middleware
+│       └── SecurityHeaders.php              # CSP, X-Frame-Options, HSTS, nosniff
+├── Support/
+│   ├── HtmlSanitize.php                     # RichEditor HTML temizleyici (kalıcı XSS savunması)
+│   └── SafeUrl.php                          # Giden URL doğrulaması (SSRF / açık redirect savunması)
 ├── Listeners/
 │   └── EvaluateActionRules.php              # ScanRecorded → aksiyon motoru (fail-safe, feature flag'li)
 ├── Jobs/
@@ -226,6 +234,8 @@ tests/
 |---|---|---|
 | GET | `/` | Anasayfa (hero, blog, partner) |
 | GET | `/check/{uuid}` | QR sorgulama (Livewire) + değerlendirme + redirect |
+| GET | `/assets/documents/{document}` | Ürün belgesi — **geçici imzalı URL zorunlu** (60 dk) |
+| GET | `/assets/digital/{product}` | Dijital içerik — **geçici imzalı URL zorunlu** (60 dk) |
 | GET | `/blog/{slug}` | Blog detay (slug tüm destekli dillerde eşlenir) |
 | GET | `/p/{slug}` | Statik sayfa (slug tüm destekli dillerde eşlenir) |
 | GET | `/iletisim` | İletişim (ContactController) |
@@ -278,6 +288,10 @@ php artisan config:clear --ansi && php artisan test
 - `CrossTenantAssignmentTest` — farklı şirket kategorisi atama reddi
 - `NavigationVisibilityTest` — super admin vs company admin menü (Company+User artık company admin'e de açık)
 - `SubCompanyIsolationTest` — parent'ın child verilerini görebildiği, child'ın parent'ı göremediği, sibling'lerin birbirini görmediği doğrulanır
+- `TenantAuthorizationHardeningTest` — company admin'in kullanıcı/firma silememesi, widget'ların fail-closed olması, `active_company_id` yeniden doğrulaması, Leaflet popup kaçışı
+- `SecureFileDeliveryTest` — private disk'in kimlik doğrulamasız açılmaması, imza zorunluluğu, `expiration_date` uygulanması, MIME/boyut kuralları, güvenlik header'ları
+- `HtmlSanitizationTest` — `<script>`, `on*`, `javascript:`, `<iframe>` temizlenmesi; diğer locale'lerin korunması
+- `OutboundUrlSafetyTest` — metadata/loopback/private IP, ondalık-hex IP kodlamaları, şema kısıtı, açık redirect engeli
 - `ActionRuleTriggerTest` — 4 tetikleyici tipi + limit + zaman penceresi davranışı
 - `ActionEngineDedupTest` — aynı scan için çift yürütme engeli + firma geneli kuralı
 - `ActionEngineFailSafeTest` — webhook hatası loglanır, flag kapalı no-op, geçersiz redirect failed
@@ -303,6 +317,12 @@ composer test
 
 # Kullanıcıyı super admin yap
 php artisan user:super-admin {email} [--create] [--name=] [--password=]
+
+# Ürün belgelerini ve dijital dosyaları private diske taşı (yükleme güvenliği)
+php artisan files:move-to-private-disk [--dry-run]
+
+# Public disk bağlantısını oluştur (yükleme/ görselleri 404 vermesin)
+php artisan storage:link
 ```
 
 ---
@@ -317,3 +337,41 @@ php artisan user:super-admin {email} [--create] [--name=] [--password=]
 - Tenant / hiyerarşi mantığı değiştiğinde
 - Sidebar / navigasyon yapısı değiştiğinde
 - Tasarım sistemi (DESIGN.md) güncellendiğinde
+
+---
+
+## 🔒 Güvenlik Notları
+
+### Dosya yükleme
+- Tüm görsel alanları `UploadRules::hardenImage()` kullanır: **yalnızca** `image/jpeg|png|webp`
+  (`image/*` kullanılmaz → SVG, kendi origin'inde doğrudan açıldığında script çalıştırır),
+  ayrıca `maxSize`, 1600px resize ve EXIF temizleme uygulanır.
+- Ürün belgeleri `UploadRules::hardenDocument()`, dijital dosya `UploadRules::DIGITAL_MAX_KB`.
+- **Ürün belgeleri ve dijital içerik `local` (private) diskte tutulur** ve yalnızca
+  `PublicAssetController` üzerinden **geçici imzalı URL (60 dk)** ile sunulur.
+  `Storage::url()` ile kalıcı URL üretmek yasaktır.
+- `config/filesystems.php` → `local` diskinin `'serve'` değeri **false** olmalıdır.
+  `true` iken `GET /storage/{path}` kimlik doğrulamasız açılır ve private disk herkese açık olur.
+- `expiration_date` artık **uygulanır**: süresi dolmuş ürünün belgesi/dijital içeriği 410 döner.
+- Deploy sonrası mutlaka `php artisan storage:link` çalıştırılmalıdır, aksi halde
+  `Storage::url()` ile üretilen görseller 404 döner.
+- Eski dosyaları taşımak için: `php artisan files:move-to-private-disk [--dry-run]`
+
+### İçerik ve çıktı
+- `posts.content` / `pages.content` `{!! !!}` ile basılır → kayıtta
+  `App\Support\HtmlSanitize` ile temizlenir (model `saving` hook'u).
+  `HasTranslations::getAttribute()` string döndürdüğü için ham attribute üzerinden çalışılır.
+- Admin tarafından verilen tüm URL'ler (webhook, redirect) `App\Support\SafeUrl::isSafe()`
+  ile doğrulanır: yalnızca http/https; private/loopback/link-local IP'ler reddedilir.
+- `CheckProduct` içindeki sunucudan türetilen property'ler `#[Locked]` işaretlidir.
+
+### Yetkilendirme
+- Eksik `can*()` metodu **fail-open** davranır. `AdminPanelProvider`'da
+  `strictAuthorization()` production dışında açıktır; canlıda policy eksikliği sessizce izin verir.
+- Widget sorguları **fail-closed** olmalıdır: tenant kapsamı çözülemezse satır döndürme.
+- `active_company_id` session değeri `getActiveCompanyId()` içinde yeniden doğrulanır.
+- `CompanyResource::canEdit()` yalnızca super admin veya kendi kök firması içindir;
+  `canDelete()` yalnızca super admin içindir.
+- `max_sub_companies` yalnızca super admin tarafından değiştirilebilir ve
+  `CreateCompany` içinde sunucu tarafında doğrulanır.
+- Hiyerarşi tek kattır: `parent_id` yalnızca kök bir firmaya işaret edebilir.

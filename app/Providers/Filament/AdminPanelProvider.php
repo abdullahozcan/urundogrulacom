@@ -81,6 +81,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            // Fail loud, not silent: without this, a resource that forgets a
+            // `can*()` method (or a model without a policy) is implicitly
+            // allowed for every panel user. Enabled outside production only,
+            // because strict mode denies anything not explicitly declared.
+            ->strictAuthorization(! app()->environment('production'));
     }
 }

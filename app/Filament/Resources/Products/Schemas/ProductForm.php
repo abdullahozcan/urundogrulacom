@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Helpers\UploadRules;
 use App\Models\Item;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -107,9 +108,12 @@ class ProductForm
                                             ->label('Son Kullanma Tarihi'),
                                         TextInput::make('serial_number')
                                             ->label('Seri Numaras&imath;'),
-                                        FileUpload::make('image')
-                                            ->image()
-                                            ->disk('public'),
+                                        UploadRules::hardenImage(
+                                            FileUpload::make('image')
+                                                ->label('Ürün Görseli')
+                                                ->directory('products')
+                                                ->disk('public'),
+                                        )->columnSpanFull(),
                                         Select::make('type')
                                             ->label('Ürün Tipi')
                                             ->options([
@@ -129,19 +133,15 @@ class ProductForm
                                         Repeater::make('documents')
                                             ->relationship('documents')
                                             ->schema([
-                                                FileUpload::make('file_path')
-                                                    ->label('Dosya')
-                                                    ->disk('public')
-                                                    ->directory('product_documents')
-                                                    ->acceptedFileTypes([
-                                                        'application/pdf',
-                                                        'image/png',
-                                                        'image/jpeg',
-                                                        'image/gif',
-                                                    ])
+                                                UploadRules::hardenDocument(
+                                                    FileUpload::make('file_path')
+                                                        ->label('Dosya')
+                                                        ->directory('product_documents'),
+                                                )
                                                     ->required(),
                                                 TextInput::make('original_name')
-                                                    ->label('Dosya Ad&imath;'),
+                                                    ->label('Dosya Ad&imath;')
+                                                    ->maxLength(255),
                                             ])
                                             ->orderColumn('sort_order')
                                             ->addActionLabel('Belge Ekle')
@@ -246,12 +246,17 @@ class ProductForm
                                         FileUpload::make('digital_file_path')
                                             ->label('Dijital Dosya')
                                             ->directory('digital_products')
-                                            ->disk('public')
+                                            // Private disk: licensed content must not have a
+                                            // permanent, unauthenticated `/storage/...` URL.
+                                            // It is streamed through PublicAssetController
+                                            // behind a short-lived signed URL instead.
+                                            ->disk('local')
+                                            ->visibility('private')
                                             ->live()
                                             ->acceptedFileTypes(fn ($get) => $get('digital_content_type') === 'video'
                                                 ? ['video/mp4', 'video/quicktime']
                                                 : ['application/pdf'])
-                                            ->maxSize(51200)
+                                            ->maxSize(UploadRules::DIGITAL_MAX_KB)
                                             ->disabled(fn ($get) => $get('type') === 'digital' && $get('digital_content_type') === 'video' && filled($get('youtube_url')))
                                             ->required(fn ($get) => $get('type') === 'digital' && ($get('digital_content_type') !== 'video' || blank($get('youtube_url'))))
                                             ->columnSpanFull(),

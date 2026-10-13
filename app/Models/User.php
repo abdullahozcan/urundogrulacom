@@ -42,26 +42,53 @@ class User extends Authenticatable
         return !$this->isSuperAdmin();
     }
 
+    /**
+     * Session'daki aktif şirketi döndürür.
+     *
+     * Session değeri asla güvenilmez kabul edilmez: kullanıcı başka bir
+     * firmaya taşınmış, firması pasifleştirilmiş ya da hiyerarşi
+     * değişmiş olabilir. Değer erişilebilir şirketler kümesinde yoksa
+     * düşürülür ve kullanıcının kendi firmasına geri dönerülür.
+     */
     public function getActiveCompanyId(): ?int
     {
         if ($this->isSuperAdmin()) {
             return null;
         }
 
-        return session('active_company_id', $this->company_id);
+        $accessible = $this->getAccessibleCompanyIds();
+        $accessible = array_values(array_filter(
+            $accessible,
+            static fn ($id): bool => $id !== null
+        ));
+
+        $active = session('active_company_id');
+
+        if ($active !== null && in_array((int) $active, $accessible, true)) {
+            return (int) $active;
+        }
+
+        return $this->company_id;
     }
 
     public function getAccessibleCompanyIds(): array
     {
         if ($this->isSuperAdmin()) {
-            return Company::pluck('id')->toArray();
+            return Company::pluck('id')->map(fn ($id) => (int) $id)->toArray();
         }
 
-        return $this->company?->accessibleCompanyIds() ?? [$this->company_id];
+        if (!$this->company_id) {
+            return [];
+        }
+
+        return array_values(array_map(
+            'intval',
+            $this->company?->accessibleCompanyIds() ?? [$this->company_id]
+        ));
     }
 
     public function canAccessCompany(Company $company): bool
     {
-        return in_array($company->id, $this->getAccessibleCompanyIds());
+        return in_array((int) $company->id, $this->getAccessibleCompanyIds(), true);
     }
 }

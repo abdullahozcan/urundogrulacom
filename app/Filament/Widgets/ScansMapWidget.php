@@ -19,10 +19,19 @@ class ScansMapWidget extends Widget
             ->whereNotNull('lat')
             ->whereNotNull('lng');
 
+        // Fail CLOSED: an unresolvable tenant scope returns no rows instead of
+        // every tenant's rows. A null `company_id` must never mean "all".
         $user = auth()->user();
-        if ($user && !$user->isSuperAdmin() && $user->company_id) {
-            $query->whereHas('item.batch.product', function ($q) use ($user) {
-                $q->where('company_id', $user->company_id);
+
+        if (!$user || !$user->isSuperAdmin()) {
+            $companyIds = $user?->getAccessibleCompanyIds() ?? [];
+
+            if ($companyIds === []) {
+                return [];
+            }
+
+            $query->whereHas('item.batch.product', function ($q) use ($companyIds) {
+                $q->whereIn('company_id', $companyIds);
             });
         }
 
@@ -30,8 +39,8 @@ class ScansMapWidget extends Widget
             return [
                 'lat' => (float) $scan->lat,
                 'lng' => (float) $scan->lng,
-                'product_name' => $scan->item?->batch?->product?->getName() ?? 'Bilinmiyor',
-                'batch_number' => $scan->item?->batch?->batch_number ?? '-',
+                'product_name' => htmlspecialchars($scan->item?->batch?->product?->getName() ?? 'Bilinmiyor', ENT_QUOTES, 'UTF-8'),
+                'batch_number' => htmlspecialchars($scan->item?->batch?->batch_number ?? '-', ENT_QUOTES, 'UTF-8'),
                 'date' => $scan->scanned_at?->format('d.m.Y H:i') ?? $scan->created_at->format('d.m.Y H:i'),
                 'device' => htmlspecialchars($scan->device_type ?? 'Bilinmiyor', ENT_QUOTES, 'UTF-8'),
                 'browser' => htmlspecialchars($scan->browser ?? '-', ENT_QUOTES, 'UTF-8'),

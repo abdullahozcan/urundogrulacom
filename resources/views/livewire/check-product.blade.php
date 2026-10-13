@@ -3,6 +3,14 @@
 
     {{-- Digital Content Modal --}}
     @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url))
+        @php
+            // Only mint a signed asset URL while the product is still valid;
+            // PublicAssetController re-checks this server side.
+            $digitalIsExpired = $product->expiration_date && $product->expiration_date->isPast();
+            $digitalUrl = (!$digitalIsExpired && $product->digital_file_path)
+                ? \App\Http\Controllers\PublicAssetController::signedUrl('assets.digital', ['product' => $product->getKey()])
+                : null;
+        @endphp
         <template x-teleport="body">
             <div x-show="mediaOpen" x-cloak x-trap.noscroll="mediaOpen"
                  class="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
@@ -11,18 +19,24 @@
                         class="absolute top-4 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
                     <span class="material-symbols-outlined text-3xl">close</span>
                 </button>
-                @if($product->digital_content_type === 'video')
+                @if($digitalIsExpired)
+                    <div class="max-w-md mx-auto px-6 text-center">
+                        <span class="material-symbols-outlined !text-[64px] text-status-warning">event_busy</span>
+                        <h3 class="text-white font-semibold text-xl mt-4">Süresi Dolmuş</h3>
+                        <p class="text-white/70 text-sm mt-2">Bu ürünün kullanım ve servis süresi sona ermiştir. Dijital içeriğe erişilemez.</p>
+                    </div>
+                @elseif($product->digital_content_type === 'video')
                     @if($product->youtube_embed_url)
                         <iframe src="{{ $product->youtube_embed_url }}?autoplay=1&rel=0"
                                 class="w-full h-full" allow="autoplay; fullscreen; accelerometer; gyroscope" allowfullscreen>
                         </iframe>
-                    @elseif($product->digital_file_path)
+                    @elseif($digitalUrl)
                         <video controls autoplay class="w-full h-full object-contain" playsinline>
-                            <source src="{{ Storage::url($product->digital_file_path) }}" type="video/mp4">
+                            <source src="{{ $digitalUrl }}" type="video/mp4">
                         </video>
                     @endif
-                @elseif($product->digital_content_type === 'pdf' && $product->digital_file_path)
-                    <iframe src="{{ Storage::url($product->digital_file_path) }}#view=fitH"
+                @elseif($product->digital_content_type === 'pdf' && $digitalUrl)
+                    <iframe src="{{ $digitalUrl }}#view=fitH"
                             class="w-full h-full" allowfullscreen>
                     </iframe>
                 @endif
@@ -139,25 +153,31 @@
 
             {{-- Documents Section --}}
             @if($product->documents->isNotEmpty())
+                @php $productExpired = $product->expiration_date && $product->expiration_date->isPast(); @endphp
                 <div class="space-y-4">
                     <h2 class="font-semibold text-lg text-deep-navy px-1">Resmi Belgeler ve Sertifikalar</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        @foreach($product->documents as $doc)
-                            <div class="group bg-white border border-deep-navy/10 rounded-xl p-4 flex flex-col gap-3 hover:border-trust-blue transition-all cursor-pointer shadow-sm">
-                                <div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
-                                    <span class="material-symbols-outlined !text-[28px]">description</span>
+                    @if($productExpired)
+                        <p class="px-1 text-sm text-status-warning">Bu ürünün süresi dolduğu için belgelere erişilemez.</p>
+                    @else
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            @foreach($product->documents as $doc)
+                                <div class="group bg-white border border-deep-navy/10 rounded-xl p-4 flex flex-col gap-3 hover:border-trust-blue transition-all cursor-pointer shadow-sm">
+                                    <div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-trust-blue group-hover:bg-trust-blue group-hover:text-white transition-colors">
+                                        <span class="material-symbols-outlined !text-[28px]">description</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-deep-navy mb-1">{{ $doc->original_name ?? basename($doc->file_path) }}</h3>
+                                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">PDF Belgesi</p>
+                                    </div>
+                                    <a href="{{ \App\Http\Controllers\PublicAssetController::signedUrl('assets.document', ['document' => $doc->getKey()]) }}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-sm group-hover:underline">
+                                        <span class="material-symbols-outlined text-[18px]">download</span> İndir (PDF)
+                                    </a>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-deep-navy mb-1">{{ $doc->original_name ?? basename($doc->file_path) }}</h3>
-                                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">PDF Belgesi</p>
-                                </div>
-                                <a href="{{ Storage::url($doc->file_path) }}" target="_blank" rel="noopener noreferrer"
-                                   class="mt-auto flex items-center gap-2 text-trust-blue font-bold text-sm group-hover:underline">
-                                    <span class="material-symbols-outlined text-[18px]">download</span> İndir (PDF)
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
@@ -183,7 +203,8 @@
             @endif
 
             {{-- Digital Content Trigger --}}
-            @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url))
+            @php $digitalExpired = $product->expiration_date && $product->expiration_date->isPast(); @endphp
+            @if($product->type === 'digital' && ($product->digital_file_path || $product->youtube_url) && !$digitalExpired)
                 <div class="bg-white border border-deep-navy/10 rounded-xl p-4 shadow-sm text-center">
                     @if($product->digital_content_type === 'video')
                         <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
@@ -208,6 +229,14 @@
                             Görüntüle
                         </button>
                     @endif
+                </div>
+            @elseif($product->type === 'digital' && $digitalExpired)
+                <div class="bg-white border border-deep-navy/10 rounded-xl p-4 shadow-sm text-center">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-status-warning/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-status-warning">event_busy</span>
+                    </div>
+                    <h3 class="font-semibold text-deep-navy">Süresi Dolmuş</h3>
+                    <p class="text-xs text-on-surface-variant mt-1">Bu ürünün kullanım ve servis süresi sona ermiştir.</p>
                 </div>
             @endif
 

@@ -17,7 +17,22 @@ class ItemForm
         return $schema
             ->components([
                 Select::make('batch_id')
-                    ->relationship('batch', 'id')
+                    ->relationship('batch', 'id', modifyQueryUsing: function (\Illuminate\Database\Eloquent\Builder $query) {
+                        // Without this the dropdown enumerated every batch in
+                        // every tenant. It currently only stays safe because
+                        // the field is disabled and therefore not dehydrated;
+                        // scoping it explicitly makes that structural rather
+                        // than incidental.
+                        $user = auth()->user();
+
+                        if (!$user || $user->isSuperAdmin()) {
+                            return;
+                        }
+
+                        $query->whereHas('product', function ($q) use ($user) {
+                            $q->whereIn('company_id', $user->getAccessibleCompanyIds());
+                        });
+                    })
                     ->required()
                     ->disabled(),
                 TextInput::make('uuid')

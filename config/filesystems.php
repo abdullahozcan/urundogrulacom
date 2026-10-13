@@ -33,7 +33,12 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // MUST stay false. `serve => true` registers an unauthenticated
+            // `GET /storage/{path}` route for this disk, which would expose
+            // private/digital product files to anyone who learns the path.
+            // Private files are only reachable through the explicitly
+            // authorized routes in App\Http\Controllers\PublicAssetController.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
