@@ -7,6 +7,7 @@ use App\Filament\Resources\ActionRules\Pages\EditActionRule;
 use App\Filament\Resources\ActionRules\Pages\ListActionRules;
 use App\Filament\Resources\ActionRules\Schemas\ActionRuleForm;
 use App\Filament\Resources\ActionRules\Tables\ActionRulesTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\ActionRule;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ActionRuleResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = ActionRule::class;
 
     protected static ?string $modelLabel = 'Aksiyon Kuralı';
@@ -53,28 +56,7 @@ class ActionRuleResource extends Resource
 
     public static function canView($record): bool
     {
-        $user = auth()->user();
-
-        if (!$user) {
-            return false;
-        }
-
-        return $user->isSuperAdmin() || in_array((int) $record->company_id, $user->getAccessibleCompanyIds());
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canView($record);
-    }
-
-    public static function canCreate(): bool
-    {
-        return (bool) auth()->user();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canView($record);
+        return static::canAccessTenantOf($record);
     }
 
     public static function getPages(): array

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Reviews;
 
 use App\Filament\Resources\Reviews\Pages\ListReviews;
 use App\Filament\Resources\Reviews\Tables\ReviewsTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\ProductReview;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ReviewResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = ProductReview::class;
 
     protected static ?string $modelLabel = 'Değerlendirme';

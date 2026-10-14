@@ -7,6 +7,7 @@ use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Schemas\CategoryForm;
 use App\Filament\Resources\Categories\Tables\CategoriesTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\Category;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CategoryResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = Category::class;
 
     protected static ?string $modelLabel = 'Kategori';
@@ -53,23 +56,7 @@ class CategoryResource extends Resource
 
     public static function canView($record): bool
     {
-        $user = auth()->user();
-
-        if (!$user) {
-            return false;
-        }
-
-        return $user->isSuperAdmin() || in_array((int) $record->company_id, $user->getAccessibleCompanyIds());
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canView($record);
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canView($record);
+        return static::canAccessTenantOf($record);
     }
 
     public static function getRelations(): array

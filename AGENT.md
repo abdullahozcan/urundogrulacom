@@ -292,6 +292,7 @@ php artisan config:clear --ansi && php artisan test
 - `SecureFileDeliveryTest` — private disk'in kimlik doğrulamasız açılmaması, imza zorunluluğu, `expiration_date` uygulanması, MIME/boyut kuralları, güvenlik header'ları
 - `HtmlSanitizationTest` — `<script>`, `on*`, `javascript:`, `<iframe>` temizlenmesi; diğer locale'lerin korunması
 - `OutboundUrlSafetyTest` — metadata/loopback/private IP, ondalık-hex IP kodlamaları, şema kısıtı, açık redirect engeli
+- `AuthorizationCoverageTest` — her Filament Resource'ün `can*()` yetkilerini tanımladığını doğrular (fail-open koruması)
 - `ActionRuleTriggerTest` — 4 tetikleyici tipi + limit + zaman penceresi davranışı
 - `ActionEngineDedupTest` — aynı scan için çift yürütme engeli + firma geneli kuralı
 - `ActionEngineFailSafeTest` — webhook hatası loglanır, flag kapalı no-op, geçersiz redirect failed
@@ -340,6 +341,51 @@ php artisan storage:link
 
 ---
 
+## 🗺️ Harita Tile Kaynakları
+
+| Tema | Kaynak | Tip | Not |
+|---|---|---|---|
+| Açık | `tile.openstreetmap.org` | raster | Değiştirilmedi |
+| Koyu | `tiles.openfreemap.org/styles/dark` | vektör | OpenFreeMap |
+
+**Neden koyu tema değişti:** eski `basemaps.cartocdn.com/dark_all` artık
+serbest kullanıma uygun değil — CARTO API anahtarı zorunlu hale getirdi ve
+basemap lisansı ücretsiz kamu kullanımını kurumsal/dernek kapsamıyla
+sınırladı. OpenFreeMap anahtarsız, kayıtsız, kotasız ve ticari kullanım
+kısıtı olmayan seçenek; ancak yalnızca **vektör** tile yayınladığı için
+Leaflet'in tek başına yetmediği, MapLibre köprüsünü gerektiren bir
+değişiklik oldu.
+
+### Yapı
+- `public/js/map-base-layer.js` → `window.UrundogrulaMap.addBaseLayer(map, isDark)`
+  Tek giriş noktası; 3 widget da bunu çağırır (tile URL'i artık kopyalanmıyor).
+- `public/vendor/maplibre/` → `npm run build:maplibres` ile üretilir
+  (`scripts/build-maplibre.mjs`, ayrıca `postinstall` hook'u).
+  Kütüphaneler bilerek **yerelde** servis edilir: MapLibre köprüsü bare
+  specifier import ettiği için import map ve build adımı gerekmiyor ve CSP'ye
+  üçüncü taraf JS origin'i eklenmek zorunda kalmıyor.
+- `leaflet-global.mjs` shim'i global `L`'yi export eder; köprü ikinci bir
+  Leaflet kopyası alırsa Leaflet'in `instanceof` kontrolleri kırılır.
+- `maplibre-gl.mjs` worker'ı `import.meta.url`'e göre çözdüğü için
+  `maplibre-gl-worker.mjs` dosyası **yanına** konmalıdır.
+- MapLibre yalnızca koyu temada lazy-load edilir (`import()`); açık temada indirilmez.
+- WebGL yoksa veya modül yüklenemezse raster dark tile'a düşülür (fallback).
+
+### CSP bağımlılıkları (`SecurityHeaders`)
+- `connect-src` → `https://tiles.openfreemap.org` (style JSON, vektör tile,
+  glyph ve sprite isteklerinin tamamı)
+- `worker-src` → `'self' blob:` (MapLibre renderer worker'ı)
+
+### İlgili widget dosyaları
+`map-widget.blade.php` (dashboard), `scans-map-widget.blade.php` (`/admin/scans`),
+`scan-location-widget.blade.php` (tarama detay).
+
+> Not: `scan-location-widget.blade.php` içindeki "OpenStreetMap'te aç" modalı
+> hâlâ `openstreetmap.org/export/embed.html` iframe'ini kullanıyor. Bu OSM
+> politika kapsamı dışında olsa da ayrı bir değerlendirme gerektirir.
+
+---
+
 ## 🔒 Güvenlik Notları
 
 ### Dosya yükleme
@@ -375,3 +421,20 @@ php artisan storage:link
 - `max_sub_companies` yalnızca super admin tarafından değiştirilebilir ve
   `CreateCompany` içinde sunucu tarafında doğrulanır.
 - Hiyerarşi tek kattır: `parent_id` yalnızca kök bir firmaya işaret edebilir.
+
+### Yetkilendirme kapsamı
+- **`strictAuthorization()` bilinçli olarak kapalıdır.** Bu projede yetkilendirme
+  Policy değil, Resource üzerindeki `can*()` override'larıyla yapılır; strict
+  mod açıkken policy'siz her model için `LogicException` fırlatıp dashboard'u
+  500'e düşürür.
+- Fail-open riski (yetkilendirmesiz her şey herkese açık) CI'da
+  `tests/Feature/AuthorizationCoverageTest.php` ile denetlenir: bir Resource
+  `canViewAny/canView/canEdit/canDelete/canDeleteAny` override'ı tanımlamazsa
+  **build kırılır**, sessizce izin verilmez. Yeni resource eklerken bu testi
+  çalıştır.
+- Sistem kaynakları (`Page`, `Post`, `Partner`, `Setting`) tenant kapsamı
+  taşımadığı için kayıt düzeyinde `canView/canEdit/canDelete` kontrolleri de
+  super admin'e bağlıdır; aksi halde `/admin/posts/{id}/edit` doğrudan erişilir.
+- Tenant kaynakları `Concerns\AuthorizesTenantRecords` trait'ini kullanır.
+  `Item → Batch → Product` gibi `company_id` içermeyen kayıtlar
+  `canAccessTenantOf()` ile çözülür ve çözülemezse **fail-closed** davranır.

@@ -13,8 +13,8 @@
                 scans: {{ json_encode($this->scans) }},
                 mapLoaded: false,
                 map: null,
-                initMap() {
-                    if (typeof L === 'undefined') {
+                async initMap() {
+                    if (typeof L === 'undefined' || !window.UrundogrulaMap) {
                         setTimeout(() => this.initMap(), 200);
                         return;
                     }
@@ -23,12 +23,9 @@
                         const el = this.$refs.mapEl;
                         const isDark = document.documentElement.classList.contains('dark');
                         this.map = L.map(el, { zoomControl: true, scrollWheelZoom: true }).setView([39.0, 35.0], 5);
-                        L.tileLayer(isDark
-                            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap contributors',
-                            maxZoom: 19
-                        }).addTo(this.map);
+
+                        // Light: OSM raster. Dark: OpenFreeMap vector (MapLibre).
+                        await window.UrundogrulaMap.addBaseLayer(this.map, isDark);
 
                         const icon = L.divIcon({
                             className: '',

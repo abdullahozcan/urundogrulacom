@@ -12,6 +12,7 @@ use App\Filament\Resources\Products\RelationManagers\ReviewsRelationManager;
 use App\Filament\Resources\Products\RelationManagers\ScansRelationManager;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\Product;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,8 @@ use Filament\Tables\Table;
 
 class ProductResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = Product::class;
     
     protected static ?string $modelLabel = 'Ürün';
@@ -139,25 +142,18 @@ class ProductResource extends Resource
         return $query->whereIn('company_id', $user->getAccessibleCompanyIds());
     }
 
-    public static function canView($record): bool
+    public static function canViewAny(): bool
     {
         $user = auth()->user();
 
-        if (!$user) {
-            return false;
-        }
-
-        return $user->isSuperAdmin() || in_array((int) $record->company_id, $user->getAccessibleCompanyIds());
+        // Records themselves are scoped by `getEloquentQuery()`; this only
+        // decides whether the resource is reachable at all.
+        return (bool) $user && ($user->isSuperAdmin() || $user->company_id !== null);
     }
 
-    public static function canEdit($record): bool
+    public static function canView($record): bool
     {
-        return static::canView($record);
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canView($record);
+        return static::canAccessTenantOf($record);
     }
 
     public static function getRelations(): array

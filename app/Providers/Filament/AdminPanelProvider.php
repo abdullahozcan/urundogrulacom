@@ -34,6 +34,11 @@ class AdminPanelProvider extends PanelProvider
         FilamentAsset::register([
             Css::make('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'),
             Js::make('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'),
+            // MapLibre is only needed for the dark theme's vector base layer and
+            // is loaded lazily by map-base-layer.js. MapLibre's own CSS is
+            // required for the canvas the bridge injects into the tile pane.
+            Css::make('maplibre-gl', asset('vendor/maplibre/maplibre-gl.css')),
+            Js::make('map-base-layer', asset('js/map-base-layer.js')),
         ], package: 'app');
 
         FilamentView::registerRenderHook(
@@ -81,11 +86,18 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            // Fail loud, not silent: without this, a resource that forgets a
-            // `can*()` method (or a model without a policy) is implicitly
-            // allowed for every panel user. Enabled outside production only,
-            // because strict mode denies anything not explicitly declared.
-            ->strictAuthorization(! app()->environment('production'));
+            ]);
+            // NOTE: `strictAuthorization()` is deliberately NOT enabled.
+            //
+            // Strict mode requires every model to have a Gate policy method.
+            // This app authorises through `can*()` overrides on the Resource
+            // classes instead, so enabling it makes Filament throw a
+            // LogicException for every resource that does not also declare a
+            // policy (ActionRule, Item, Batch, Scan, ...), which 500s the
+            // dashboard outright.
+            //
+            // The fail-open risk that strict mode would have caught is covered
+            // by tests/Feature/AuthorizationCoverageTest.php instead: a missing
+            // `can*()` override fails CI rather than silently allowing access.
     }
 }

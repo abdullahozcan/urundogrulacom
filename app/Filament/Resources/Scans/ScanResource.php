@@ -7,6 +7,7 @@ use App\Filament\Resources\Scans\Pages\EditScan;
 use App\Filament\Resources\Scans\Pages\ListScans;
 use App\Filament\Resources\Scans\Schemas\ScanForm;
 use App\Filament\Resources\Scans\Tables\ScansTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\Scan;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,8 @@ use Filament\Tables\Table;
 
 class ScanResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = Scan::class;
     
     protected static ?string $modelLabel = 'Okuma (Scan)';
@@ -51,6 +54,15 @@ class ScanResource extends Resource
         return $query->whereHas('item.batch.product', function (Builder $q) use ($user) {
             $q->whereIn('company_id', $user->getAccessibleCompanyIds());
         });
+    }
+
+    /**
+     * Scan has no `company_id` of its own; ownership is resolved through
+     * `item.batch.product`. Fails closed when that chain cannot be resolved.
+     */
+    public static function canView($record): bool
+    {
+        return static::canAccessTenantOf($record);
     }
 
     public static function getRelations(): array

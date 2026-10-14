@@ -7,6 +7,7 @@ use App\Filament\Resources\Batches\Pages\EditBatch;
 use App\Filament\Resources\Batches\Pages\ListBatches;
 use App\Filament\Resources\Batches\Schemas\BatchForm;
 use App\Filament\Resources\Batches\Tables\BatchesTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\Batch;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,8 @@ use Filament\Tables\Table;
 
 class BatchResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = Batch::class;
     
     protected static ?string $modelLabel = 'Parti';
@@ -56,6 +59,15 @@ class BatchResource extends Resource
         return $query->whereHas('product', function (Builder $q) use ($user) {
             $q->whereIn('company_id', $user->getAccessibleCompanyIds());
         });
+    }
+
+    /**
+     * Batch has no `company_id` of its own; ownership is resolved through
+     * `product`. Fails closed when that chain cannot be resolved.
+     */
+    public static function canView($record): bool
+    {
+        return static::canAccessTenantOf($record);
     }
 
     public static function getRelations(): array

@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class PageResource extends Resource
 {
@@ -27,7 +28,45 @@ class PageResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        return static::isSuperAdminUser();
+    }
+
+    /**
+     * `canViewAny()` only hides the menu item and gates the list route. This
+     * resource has no tenant scoping in `getEloquentQuery()`, so without the
+     * record-level checks a company admin could reach a single record directly
+     * at its `/{id}/edit` URL and act on it.
+     */
+    public static function canView(Model $record): bool
+    {
+        return static::isSuperAdminUser();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::isSuperAdminUser();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::isSuperAdminUser();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::isSuperAdminUser();
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::isSuperAdminUser();
+    }
+
+    protected static function isSuperAdminUser(): bool
+    {
+        $user = auth()->user();
+
+        return (bool) $user?->isSuperAdmin();
     }
 
     public static function form(Schema $schema): Schema

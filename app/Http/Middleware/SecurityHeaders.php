@@ -40,7 +40,12 @@ class SecurityHeaders
                 // Tailwind Play CDN, unpkg (Leaflet) and the youtube embeds.
                 "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://www.youtube.com https://youtube.com",
                 "frame-src 'self' https://www.youtube.com https://youtube.com",
-                "connect-src 'self'",
+                // OpenFreeMap (dark map theme): the style JSON, the vector
+                // tiles, the glyph and sprite requests all come from here.
+                "connect-src 'self' https://tiles.openfreemap.org",
+                // MapLibre spawns its renderer in a module worker, and falls
+                // back to a blob worker on browsers without module workers.
+                "worker-src 'self' blob:",
                 "media-src 'self' blob:",
             ]),
         ];

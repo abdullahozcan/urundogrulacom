@@ -7,6 +7,7 @@ use App\Filament\Resources\Items\Pages\EditItem;
 use App\Filament\Resources\Items\Pages\ListItems;
 use App\Filament\Resources\Items\Schemas\ItemForm;
 use App\Filament\Resources\Items\Tables\ItemsTable;
+use App\Filament\Resources\Concerns\AuthorizesTenantRecords;
 use App\Models\Item;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,8 @@ use Filament\Tables\Table;
 
 class ItemResource extends Resource
 {
+    use AuthorizesTenantRecords;
+
     protected static ?string $model = Item::class;
     
     protected static ?string $modelLabel = 'Öğe (Item)';
@@ -56,6 +59,15 @@ class ItemResource extends Resource
         return $query->whereHas('batch.product', function (Builder $q) use ($user) {
             $q->whereIn('company_id', $user->getAccessibleCompanyIds());
         });
+    }
+
+    /**
+     * Item has no `company_id` of its own; ownership is resolved through
+     * `batch.product`. Fails closed when that chain cannot be resolved.
+     */
+    public static function canView($record): bool
+    {
+        return static::canAccessTenantOf($record);
     }
 
     public static function getRelations(): array
